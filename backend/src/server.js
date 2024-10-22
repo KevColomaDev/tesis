@@ -7,7 +7,7 @@ import cors from 'cors'
 export const app = e()
 
 const allowedOrigins = [
-  'http://localhost:3000', // Development
+  'http://localhost:5173', // Development
   'https://examen-full-stack-frontend.vercel.app', // Production
   'https://centro-de-hospitalidad-solca.vercel.app'
 ]
