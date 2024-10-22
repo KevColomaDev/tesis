@@ -1,48 +1,38 @@
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useState, useEffect, useContext } from 'react';
+import { Mensaje } from '../components/Message';
 import logo from '../assets/Logo.png';
+import { loginRequest } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
+import { SessionContext } from '../context/SessionContext';
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  });
+  const { register, handleSubmit } = useForm();
+  const [error, setError] = useState({});
+  const { setIsAuthenticated ,isAuthenticated } = useContext(SessionContext);
+
 
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
-      const response = await fetch('http://localhost:3000/api/login', { // Cambia la URL según la ruta de tu API
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Maneja el éxito, por ejemplo, redirigiendo a la página de habitaciones
-        console.log('Usuario correcto:', data);
-        navigate('/habitaciones'); // Redirige después de un login exitoso
-      } else {
-        // Maneja el error, por ejemplo, mostrando un mensaje de error
-        console.error('Usuario Incorrecto:', data);
+      console.log(data);
+      const response = await loginRequest(data)
+      if (response) {
+        setIsAuthenticated(true)
+        console.log(isAuthenticated)
       }
     } catch (error) {
-      console.error('Error en la solicitud:', error);
+      console.log(error.response.data.msg)
+      setError({ type: 'Error: ', message: 'Credenciales incorrectas' })
+      console.log(error)
     }
-  };
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/habitaciones');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="flex min-h-screen flex-col justify-center px-5 pt-5 lg:pt-1 lg:px-8 bg-slate-100">
@@ -58,21 +48,20 @@ export default function Login() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
               Usuario
             </label>
             <div className="mt-2">
               <input
-                id="username"
+                id="email"
                 name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleChange}
+                type="email"
                 autoComplete="username"
                 required
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-900 focus:outline-none sm:text-sm sm:leading-6"
+                {...register('email')}
               />
             </div>
           </div>
@@ -88,11 +77,10 @@ export default function Login() {
                 id="password"
                 name="password"
                 type="password"
-                value={formData.password}
-                onChange={handleChange}
                 autoComplete="current-password"
                 required
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-900 focus:outline-none sm:text-sm sm:leading-6"
+                {...register('password')}
               />
             </div>
           </div>
@@ -104,6 +92,9 @@ export default function Login() {
             >
               Ingresar
             </button>
+          </div>
+          <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm aspect-[9/1]">
+            {Object.keys(error).length > 0 && <Mensaje type={error.type} message={error.message}/>}
           </div>
         </form>
       </div>
