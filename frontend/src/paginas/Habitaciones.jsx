@@ -1,39 +1,48 @@
-import React from 'react';
 import Carta from '../components/Carta';
+import { dataRoomRequest } from '../api/auth';
+import { useState, useEffect } from 'react';
+import { InfoProvider } from '../context/InfoContext';
+import { Description } from '../components/Description';
 
 const Habitaciones = () => {
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    const roomData = async () => {
+      const roomNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      const roomData = await Promise.all(roomNumbers.map(number => dataRoomRequest(number)))
+      setRooms(roomData)
+    }
+    roomData()
+  }, [])
+
   return (
-    <div className="p-4">
-      {/* Dashboard */}
-      <div className="bg-gray-300 shadow-md rounded-lg p-6 mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Dashboard</h2>
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          {/* Sección de Habitaciones Disponibles */}
-          <div className="flex flex-col items-center p-4">
-            <h3 className="text-lg font-medium mb-2">Habitaciones Disponibles</h3>
-            {/* Agregar lógica para mostrar el número de habitaciones disponibles */}
-            <p className="text-gray-600 text-2xl font-semibold">15</p>
-          </div>
-          
-          {/* Sección de Comidas */}
-          <div className="flex flex-col items-center p-4">
-            <h3 className="text-lg font-medium mb-2">Comidas</h3>
-            <div className="flex gap-2">
-              <span className="px-2 py-1 bg-green-200 text-green-800 rounded-md">Blanda</span>
-              <span className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-md">Normal</span>
-              <span className="px-2 py-1 bg-blue-200 text-blue-800 rounded-md">Líquida</span>
-            </div>
-          </div>
+    <InfoProvider>
+      <div className="p-4">
+        {/* Dashboard */}
+        <Description />
+
+        {/* Cartas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* {Array.from({ length: 15 }, (_, index) => (
+            <Carta key={index} title={`Habitación ${index + 1}`}/>
+          ))} */}
+          {rooms.map((room, index) => (
+            <Carta
+              title={`Habitación ${room.h_number}`}
+              key={index}
+              room={room.h_number}
+              name={room.name}
+              ci={room.ci}
+              condition={room.condition}
+              food={room.food}
+              admissionDate={room.admissionDate}
+              observations={room.observations}
+            />
+          ))}
         </div>
       </div>
-
-      {/* Cartas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 15 }, (_, index) => (
-          <Carta key={index} title={`Habitación ${index + 1}`} />
-        ))}
-      </div>
-    </div>
+    </InfoProvider>
   );
 };
 

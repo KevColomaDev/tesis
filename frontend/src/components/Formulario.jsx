@@ -1,91 +1,108 @@
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { registerInRoomRequest } from '../api/auth';
 
-const Formulario = ({ onClose }) => {
-  const [formData, setFormData] = useState({
-    nombres: '',
-    apellidos: '',
-    edad: '',
-    condicion: '',
-    comidas: '',
-    fechaIngreso: '',
-    fechaSalida: ''
-  });
+const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({ defaultValues: initialData });
+  const parseDate = (date) => {
+    if (!date || date.includes('-')) return date
+    const [day, month, year] = date.split('/')
+    return `${year}-${month}-${day}`
+  }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
+  const formatDate = (date) => {
+    if (!date) return ''
+    const [year, month, day] = date.split('-')
+    return `${day}/${month}/${year}`
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     try {
-      const response = await fetch('http://localhost:3000/api/habitaciones/registro', { // Ajusta la URL según sea necesario
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const result = await response.json();
-      console.log(result);
-      if (response.ok) {
-        alert('Habitación registrada exitosamente');
-        onClose(); // Cierra el formulario al registrar con éxito
+      console.log(data)
+      const formData = {
+        h_number: h_number,
+        ...data,
+        admissionDate: data.admissionDate ? formatDate(data.admissionDate) : ''
+      }
+      const response = await registerInRoomRequest(formData)
+      if (response.msg === 'Patient registered') {
+        onComplete(formData)
       } else {
-        alert('Error al registrar la habitación');
+        onComplete()
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error al registrar la habitación');
+      console.log(error)
     }
-  };
+  }
+
+  useEffect(() => {
+    const formattedData = {
+      name: initialData?.name && initialData.name.includes('-') ? '' : initialData?.name || '',
+      ci: initialData?.ci && initialData.ci.includes('-') ? '' : initialData?.ci || '',
+      condition: initialData?.condition && initialData.condition.includes('-') ? '' : initialData?.condition || '',
+      food: initialData?.food && initialData.food.includes('-') ? '' : initialData?.food || '',
+      admissionDate: initialData?.admissionDate && initialData.admissionDate.includes('-') ? '' : parseDate(initialData?.admissionDate || ''),
+      observations: initialData?.observations && initialData.observations.includes('-') ? '' : initialData?.observations || ''
+    }
+    reset(formattedData)
+  }, [initialData, reset])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
       <div className="bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
         <h3 className="text-lg font-semibold mb-4 text-center">Ingreso de paciente</h3>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           {/* Campo de nombre */}
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Nombre</label>
             <input
               type="text"
-              name="nombres"
-              value={formData.nombres}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              name="name"
               placeholder="Ingrese el nombre"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('name', {
+                required: 'Este campo es requerido',
+                pattern: {
+                  value: /^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/i,
+                  message: "Solo se permiten letras y espacios."
+                },
+                minLength: {
+                  value: 3,
+                  message: 'El nombre debe tener al menos 3 caracteres.'
+                },
+                maxLength: {
+                  value: 30,
+                  message: 'El nombre no puede tener más de 30 caracteres.'
+                }          
+              })}
             />
+            {errors.nombres && <p className="text-red-500 text-sm">{errors.nombres.message}</p> }
           </div>
 
-          {/* Campo de apellidos */}
+          {/* Campo de cedula */}
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Apellidos</label>
+            <label className="block text-sm font-medium mb-1">Cédula</label>
             <input
               type="text"
-              name="apellidos"
-              value={formData.apellidos}
-              onChange={handleChange}
+              name="ci"
+              placeholder="Ingrese el numero de cedula"
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
-              placeholder="Ingrese los apellidos"
-            />
-          </div>
-
-          {/* Campo de edad */}
-          <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Edad</label>
-            <input
-              type="number"
-              name="edad"
-              value={formData.edad}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
-              placeholder="Ingrese la edad"
+              {...register('ci', {
+                required: 'Este campo es requerido',
+                pattern: {
+                  value: /^[0-9]+$/i,
+                  message: "Solo se permiten números."
+                },
+                minLength: {
+                  value: 8,
+                  message: 'La cedula debe tener al menos 8 caracteres.'
+                },
+                maxLength: {
+                  value: 10,
+                  message: 'La cedula no puede tener más de 10 caracteres.'
+                }          
+              })}
             />
           </div>
 
@@ -94,28 +111,44 @@ const Formulario = ({ onClose }) => {
             <label className="block text-sm font-medium mb-1">Condición</label>
             <input
               type="text"
-              name="condicion"
-              value={formData.condicion}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              name="condition"
               placeholder="Ingrese la condición"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('condition', {
+                required: 'Este campo es requerido',
+                pattern: {
+                  value: /^[A-Za-z\s]+$/i,
+                  message: "Solo se permiten letras y espacios."
+                },
+                minLength: {
+                  value: 3,
+                  message: 'La condición debe tener al menos 3 caracteres.'
+                },
+                maxLength: {
+                  value: 30,
+                  message: 'La condición no puede tener más de 30 caracteres.'
+                }          
+              })}
             />
+            { errors.condicion && <p className="text-red-500 text-sm">{errors.condicion.message}</p> }
           </div>
 
           {/* Campo de comida */}
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Comida</label>
             <select
-              name="comidas"
-              value={formData.comidas}
-              onChange={handleChange}
+              name="food"
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('food', {
+                required: 'Este campo es requerido',
+              })}
             >
               <option value="">Seleccione</option>
               <option value="Blanda">Blanda</option>
               <option value="Normal">Normal</option>
               <option value="Líquida">Líquida</option>
             </select>
+            {errors.comidas && <p className="text-red-500 text-sm">{errors.comidas.message}</p> }
           </div>
 
           {/* Campo de fecha de ingreso */}
@@ -123,23 +156,39 @@ const Formulario = ({ onClose }) => {
             <label className="block text-sm font-medium mb-1">Fecha de Ingreso</label>
             <input
               type="date"
-              name="fechaIngreso"
-              value={formData.fechaIngreso}
-              onChange={handleChange}
+              name="admissionDate"
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('admissionDate', {
+                required: 'Este campo es requerido',
+              })}
             />
+            {errors.fechaIngreso && <p className="text-red-500 text-sm">{errors.fechaIngreso.message}</p> }
           </div>
 
           {/* Campo de fecha de egreso */}
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Fecha de Egreso</label>
             <input
               type="date"
-              name="fechaSalida"
-              value={formData.fechaSalida}
-              onChange={handleChange}
+              name="departureDate"
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('departureDate', {
+                required: 'Este campo es requerido',
+              })}
             />
+            {errors.fechaSalida && <p className="text-red-500 text-sm">{errors.fechaSalida.message}</p> }
+          </div> */}
+
+          {/* Campo de observaciones */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-1">Observaciones</label>
+            <textarea
+              name="observations"
+              placeholder="Ingrese las observaciones"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
+              {...register('observations')}
+            />
+            {errors.observaciones && <p className="text-red-500 text-sm">{errors.observaciones.message}</p> }
           </div>
 
           <div className="flex justify-between mt-4">
@@ -163,6 +212,12 @@ const Formulario = ({ onClose }) => {
   );
 };
 
+Formulario.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onComplete: PropTypes.func.isRequired,
+  h_number: PropTypes.number.isRequired,
+  initialData: PropTypes.object
+};
 export default Formulario;
 
 
