@@ -21,7 +21,7 @@ export const createSupply = async (req, res) => {
       return res.status(400).json(itemInput.errors)
     }
     // Verify if name field is empty
-    if (Object.values(itemInput).includes('')) {
+    if (Object.values(itemInput)[0] === '') {
       return res.status(400).json({ msg: 'Complete the name field.' })
     }
     // Verify if item already exists
@@ -62,10 +62,13 @@ export const addStock = async (req, res) => {
     if (Object.keys(suppliesInput).includes('issues')) {
       return res.status(400).json({ errors: suppliesInput.issues })
     }
-    const { id } = req.params
-    const { quantity } = await collectionSuplies.findOne({ _id: new mongoose.Types.ObjectId(id) })
+    if (suppliesInput.quantity === 0) {
+      return res.status(200).json({ msg: 'No quantity registered' })
+    }
+    const { name: nameInput } = req.params
+    const { quantity } = await collectionSuplies.findOne({ name: nameInput })
     const updateSupplies = await collectionSuplies.findOneAndUpdate(
-      { _id: new mongoose.Types.ObjectId(id) },
+      { name: nameInput },
       { $set: { quantity: quantity + suppliesInput.quantity } },
       { returnDocument: 'after' }
     )

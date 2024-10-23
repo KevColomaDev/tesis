@@ -4,7 +4,7 @@ export const collectionSuplies = db.collection('Supplies')
 export const supplies = {
   async getSupplies () {
     try {
-      const supplies = await collectionSuplies.find().toArray()
+      const supplies = await collectionSuplies.find().sort({ quantity: -1 }).toArray()
       return supplies
     } catch (error) {
       console.log(error.message)

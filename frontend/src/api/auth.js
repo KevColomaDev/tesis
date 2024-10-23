@@ -48,14 +48,26 @@ export const generateReportRequest = async (roomNumber) => {
 // Supplies API
 
 export const getAllSuppliesRequest = async () => {
-  const response = await axios.get(`${suppliesAPI}/all-supplies`, { withCredentials: true })
+  const response = await axios.get(`${suppliesAPI}`, { withCredentials: true })
   return response.data
 }
 
-export const registerSpplies = async (data) => {
-  const response = await axios.post(`${suppliesAPI}/register-supplies`, data, { withCredentials: true })
-  return response.data
+export const addStockRequest = async (name, data) => {
+  try {
+    const response = await axios.put(`${suppliesAPI}/add-stock/${name}`, data, { withCredentials: true })
+    return response.data
+  } catch (error) {
+    return error
+  }
 }
+export const newSupplyRequest = async (data) => {
+  try {
+    const response = await axios.post(`${suppliesAPI}/new-supply`, data, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+};
 
 export const registerSuppliesRoom = async (data) => {
   const response = await axios.post(`${suppliesAPI}/assign-supplies`, data, { withCredentials: true })
