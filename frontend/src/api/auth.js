@@ -2,6 +2,7 @@ import axios from "axios"
 
 const administratorAPI = 'http://localhost:4321/administrators'
 const suppliesAPI = 'http://localhost:4321/supplies'
+const donationsAPI = 'http://localhost:4321/donations'
 // const administratorAPI = 'https://examen-full-stack-backend.onrender.com/administrators'
 // const suppliesAPI = 'https://examen-full-stack-backend.onrender.com/supplies'
 
@@ -71,5 +72,10 @@ export const newSupplyRequest = async (data) => {
 
 export const registerSuppliesRoom = async (data) => {
   const response = await axios.post(`${suppliesAPI}/assign-supplies`, data, { withCredentials: true })
+  return response.data
+}
+
+export const getAllDonationsRequest = async () => {
+  const response = await axios.get(`${donationsAPI}`, { withCredentials: true })
   return response.data
 }
