@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
 import Reporte from '../components/Reporte';
-import { getAllDonationsRequest } from '../api/auth';
+import { createCampaignRequest, getAllDonationsRequest } from '../api/auth';
 
 const Donaciones = () => {
-    const [isOtherItem, setIsOtherItem] = useState(true);
-    const [itemName, setItemName] = useState('')
-    const [itemQuantity, setItemQuantity] = useState(0)
     const [items, setItems] = useState([])
     const [donations, setDonations] = useState([])
+
+    const [isOtherItem, setIsOtherItem] = useState(true);
+    const [validInputName, setValidInputName] = useState(true)
+    const [validInput, setValidInput] = useState(true)
+    
+    const [campaignName, setCampaignName] = useState('')
+    const [itemName, setItemName] = useState('')
+    const [newItemName, setNewItemName] = useState('')
+    const [itemQuantity, setItemQuantity] = useState(0)
+    
     const [showReport, setShowReport] = useState(false);
 
     const toggleReport = () => {
@@ -28,30 +35,79 @@ const Donaciones = () => {
             setIsOtherItem(true)
         }else {
             setIsOtherItem(false)
+            setNewItemName('')
             setItemName(e.target.value)
         }
     }
-    const handleChangeQuantity = (e) => {
-        setItemQuantity(e.target.value)
-    }
-    const handleClickItem = (e) => {
-        e.preventDefault()
-        if (items.find(item => item.name === itemName)){
-            const newItems = items.map(item => {
-                if(item.name === itemName){
-                    item.quantity = Number(item.itemQuantity) + itemQuantity
-                }
-                return item
-            })
-            setItems(newItems)
-        }else{
-            items.push({name:itemName, quantity: itemQuantity})
+    const handleChangeQuantity = (e) => { setItemQuantity(e.target.value) }
+    const handleChangeNewItemName = (e) =>{ setNewItemName(e.target.value) }
+    const handleCamapaignName = e => { setCampaignName(e.target.value) }
+
+    const handleClickItem = () => {
+        if (itemQuantity > 0 && itemQuantity < 100){
+            // If item already exists add the quantity to them
+            if (items.find(item => item.name === itemName)){
+                const newItems = items.map(item => {
+                    if(item.name === itemName){
+                        item.quantity = Number(item.quantity) + Number(itemQuantity)
+                    }
+                    return item
+                })
+                setItems(newItems)
+            }else{
+                items.push({name:itemName, quantity: Number(itemQuantity)})
+            }
+            setItemQuantity(0)
+        } else {
+            setValidInput(false);
+            setTimeout(() => setValidInput(true),2000)
         }
-        setItemQuantity(0)
+    }
+
+    const handleClickNewItem = () => {
+        if (itemQuantity > 0 && itemQuantity < 100){
+            if (newItemName !== ''){
+                // If item already exists add the quantity to them
+                if (items.find(item => item.name === newItemName)){
+                    const newItems = items.map(item => {
+                        if(item.name === newItemName){
+                            item.quantity = Number(item.quantity) + Number(itemQuantity)
+                        }
+                        return item
+                    })
+                    setItems(newItems)
+                }else{
+                    items.push({name: newItemName, quantity: Number(itemQuantity)})
+                }
+                setItemQuantity(0)
+            } else {
+                setValidInputName(false)
+                setTimeout(() => setValidInputName(true),2000)
+            }
+        } else {
+            setValidInput(false);
+            setTimeout(() => setValidInput(true),2000)
+        }
+    }
+
+    const handleSubmit = async () => {
+        const form = {
+            name: campaignName,
+            items: items
+        }
+        const response = await createCampaignRequest(form);
+        if (Object.keys(response).includes('response')) {
+            console.log(response.response.data.msg)
+        }else {
+            setCampaignName('')
+            setItems([])
+            setItemQuantity(0)
+            
+            console.log(response)
+        }
     }
 
     useEffect(()=>{
-        console.log(items)
         setItems(items)
     },[items])
 
@@ -75,10 +131,10 @@ const Donaciones = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full justify-items-center"> {/* Responsivo: 1 columna en móviles, 2 en pantallas más grandes */}
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
                     <h3 className="text-lg font-semibold mb-4 text-center">Campaña</h3>
-                    <form className="space-y-4 w-full">
+                    <div className="space-y-4 w-full">
                         <label className="flex justify-between items-center">
                             Campaña:
-                            <input type="text" className="w-full ml-1 p-1 border rounded-md" />
+                            <input onChange={handleCamapaignName} value={campaignName} type="text" className="w-full ml-1 p-1 border rounded-md" />
                         </label>
                         {items.map((item, index) => (
                             <div key={index} className='flex justify-between items-center'>
@@ -93,24 +149,24 @@ const Donaciones = () => {
                                 ))}
                                 <option value="Otro" onChange={handleChange}>Ingresar Otro</option>
                             </select>
-                            <input name='quantity' value={itemQuantity} onChange={handleChangeQuantity} type="number" max="99" className="w-24 p-2 border rounded-md" placeholder='Cantidad' />
+                            <input name='quantity' value={itemQuantity} onChange={handleChangeQuantity} type="number" max="99" min={0} className={`w-24 p-2 border rounded-md ${!validInput && 'border-red-500'}`} placeholder='Cantidad' />
                             {!isOtherItem && <button onClick={handleClickItem} className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950">+</button>}
                         </label>
                         {isOtherItem && (
                         <label className="flex justify-between">
-                            <input type="text" className="w-full mr-2 p-2 border rounded-md" placeholder='Nombre del nuevo item'/>
-                            <button className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950">+</button>
+                            <input type="text" onChange={handleChangeNewItemName} value={newItemName} className={`w-full mr-2 p-2 border rounded-md ${!validInputName && 'border-red-500'}`} placeholder='Nombre del nuevo item'/>
+                            <button onClick={handleClickNewItem} className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950">+</button>
                         </label>
                         )}
                         <div className="flex justify-center">
                             <button
-                                type="submit"
+                            onClick={handleSubmit}
                                 className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
                             >
                                 Registrar Campaña
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
