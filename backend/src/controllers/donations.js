@@ -34,6 +34,9 @@ export const createCampaign = async (req, res) => {
       return res.status(400).json({ msg: 'Complete the name field.' })
     }
     const items = campaignInput.items
+    if (items.length === 0) {
+      return res.status(400).json({ msg: 'At least you need an item.' })
+    }
     items.forEach(async item => {
       const donationExist = await collectionDonations.findOne({ name: item.name })
       if (donationExist) {
