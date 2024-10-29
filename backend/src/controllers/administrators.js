@@ -189,3 +189,31 @@ export const generateReport = async (req, res) => {
     console.log(error)
   }
 }
+
+export const createRoom = async (req, res) => {
+  try {
+    const room = req.body
+    const isRoomCreated = await administrators.verifyRoom(room.h_number)
+    if (isRoomCreated) {
+      return res.status(401).json({ msg: 'Room already exists' })
+    }
+    const newRoom = await administrators.createRoom(room)
+    return res.status(200).json({ msg: 'Room created', newRoom })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const deletedRoom = async (req, res) => {
+  try {
+    const hNumber = parseInt(req.params.hNumber)
+    const isRoomCreated = await administrators.verifyRoom(hNumber)
+    if (!isRoomCreated) {
+      return res.status(401).json({ msg: 'Room does not exist' })
+    }
+    const deletedRoom = await administrators.deleteRoom(hNumber)
+    return res.status(200).json({ msg: 'Room deleted', deletedRoom })
+  } catch (error) {
+    console.log(error)
+  }
+}

@@ -53,5 +53,29 @@ export const administrators = {
     } catch (error) {
       console.log(error)
     }
+  },
+  async createRoom (room) {
+    try {
+      const newRoom = await collectionRooms.insertOne(room)
+      return newRoom
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async deleteRoom (hNumber) {
+    try {
+      const deletedRoom = await collectionRooms.findOneAndDelete({ h_number: hNumber })
+      return deletedRoom
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async verifyRoom (hNumber) {
+    try {
+      const verifyRoom = await collectionRooms.findOne({ h_number: hNumber })
+      return verifyRoom
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
