@@ -3,6 +3,7 @@ import { router } from './routers/administrators.js'
 import { routerSupplies } from './routers/supplies.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import { routerDonations } from './routers/donations.js'
 
 export const app = e()
 
@@ -32,3 +33,4 @@ app.use(e.json())
 // Routes
 app.use('/administrators', router)
 app.use('/supplies', routerSupplies)
+app.use('/donations', routerDonations)

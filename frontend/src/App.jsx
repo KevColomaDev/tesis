@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Habitaciones from './paginas/Habitaciones';
 import Suministros from './paginas/Suministros';
 import Donaciones from './paginas/Donaciones';
+import AdminOptions from './paginas/AdminOptions';
 import { SessionProvider } from './context/SessionContext';
 
 
@@ -35,6 +36,13 @@ const App = () => {
             <>
               <Header />
               <Donaciones />
+            </>
+          } />
+          
+          <Route path="/admin" element={
+            <>
+              <Header />
+              <AdminOptions />
             </>
           } />
           

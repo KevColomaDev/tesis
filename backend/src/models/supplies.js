@@ -4,21 +4,14 @@ export const collectionSuplies = db.collection('Supplies')
 export const supplies = {
   async getSupplies () {
     try {
-      const supplies = await collectionSuplies.find().toArray()
-      return supplies[0]
+      const supplies = await collectionSuplies.find().sort({ quantity: -1 }).toArray()
+      return supplies
     } catch (error) {
       console.log(error.message)
+      return error
     }
   },
 
-  async registerSupplies (supplies) {
-    try {
-      const newSupplies = await collectionSuplies.findOneAndUpdate({ name: supplies.name }, { $set: supplies }, { upsert: true })
-      return newSupplies
-    } catch (error) {
-      console.log(error.message)
-    }
-  },
   async registerSupliesRoom (supplies) {
     try {
       const findRoom = await collectionRooms.findOne({ h_number: supplies.h_number })
