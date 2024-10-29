@@ -58,7 +58,7 @@ export const addStockRequest = async (name, data) => {
     const response = await axios.put(`${suppliesAPI}/add-stock/${name}`, data, { withCredentials: true })
     return response.data
   } catch (error) {
-    return error
+    return error.response ? error.response.data : { msg: 'Something went wrong' }
   }
 }
 export const newSupplyRequest = async (data) => {
@@ -70,10 +70,25 @@ export const newSupplyRequest = async (data) => {
   }
 };
 
-export const registerSuppliesRoom = async (data) => {
-  const response = await axios.post(`${suppliesAPI}/assign-supplies`, data, { withCredentials: true })
-  return response.data
+export const assignSuppliesRequest = async (room, data) => {
+  try {
+    const response = await axios.post(`${suppliesAPI}/assign/${room}`, data, { withCredentials: true })
+    return response.data
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
 }
+
+export const deleteSupplyRequest = async (id) => {
+  try {
+    const response = await axios.delete(`${suppliesAPI}/${id}`, { withCredentials: true })
+    return response.data
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' }
+  }
+}
+
+// Donations API
 
 export const getAllDonationsRequest = async () => {
   const response = await axios.get(`${donationsAPI}`, { withCredentials: true })

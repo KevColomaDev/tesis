@@ -128,8 +128,18 @@ export default function Header() {
                     tabIndex="-1"
                   >
                     <Link
+                      onClick={()=> setIsMenuOpen(false)}
+                      to="/admin"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
+                      role="menuitem"
+                      tabIndex="-1"
+                      id="user-menu-item-2"
+                    >
+                      Opciones del administrador
+                    </Link>
+                    <Link
                       to="/login"
-                      className="block px-4 py-2 text-sm text-gray-700"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
                       role="menuitem"
                       tabIndex="-1"
                       id="user-menu-item-2"
