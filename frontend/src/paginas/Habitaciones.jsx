@@ -1,41 +1,37 @@
 import Carta from '../components/Carta';
-import { dataRoomRequest } from '../api/auth';
+import { dataRoomRequest, getAllRoomsRequest, createRoomRequest, deleteRoomRequest } from '../api/auth';
 import { useState, useEffect } from 'react';
 import { InfoProvider } from '../context/InfoContext';
 import { Description } from '../components/Description';
 
 const Habitaciones = () => {
   const [rooms, setRooms] = useState([]);
-
+  const addRoom = async () => {
+    const newRoomNumber = rooms.length + 1;
+    const newRoomData = {
+        h_number: newRoomNumber
+    };
+    const newRoom = await createRoomRequest(newRoomData);
+    setRooms(prevRooms => [...prevRooms, newRoom])
+    window.location.reload();
+  };
+  
   useEffect(() => {
     const roomData = async () => {
-      const roomNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-      const roomData = await Promise.all(roomNumbers.map(number => dataRoomRequest(number)));
+      const totalRooms = await getAllRoomsRequest();
+      // Convert number of totalRooms into an array of numbers
+      const totalRoomsArray = Array.from({ length: totalRooms }, (_, index) => index + 1);
+      const roomData = await Promise.all(totalRoomsArray.map(number => dataRoomRequest(number)));
       setRooms(roomData);
     };
     roomData();
   }, []);
 
-  const addRoom = () => {
-    const newRoomNumber = rooms.length + 1; // Assuming room numbers are sequential
-    const newRoom = {
-      h_number: newRoomNumber,
-      name: '',
-      ci: '', // Add default values as needed
-      condition: '',
-      food: '',
-      admissionDate: '',
-      observations: ''
-    };
-    setRooms([...rooms, newRoom]);
-  };
-
-  const removeRoom = () => {
-    const roomNumberToRemove = prompt("Ingrese el número de habitación a eliminar:");
-    if (roomNumberToRemove) {
-      const updatedRooms = rooms.filter(room => room.h_number !== parseInt(roomNumberToRemove));
-      setRooms(updatedRooms);
-    }
+  const removeRoom = async () => {
+    const lastRoom = rooms[rooms.length - 1];
+    await deleteRoomRequest(lastRoom.h_number);
+    setRooms(prevRooms => prevRooms.slice(0, -1));
+    window.location.reload();
   };
 
   return (
@@ -68,6 +64,9 @@ const Habitaciones = () => {
               condition={room.condition}
               food={room.food}
               admissionDate={room.admissionDate}
+              admissionTime={room.admissionTime}
+              departureDate={room.departureDate}
+              departureTime={room.departureTime}
               observations={room.observations}
             />
           ))}

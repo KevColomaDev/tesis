@@ -17,13 +17,20 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
     return `${day}/${month}/${year}`
   }
 
+  const transformTimetoString = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
+
   const onSubmit = async (data) => {
     try {
       console.log(data)
       const formData = {
         h_number: h_number,
         ...data,
-        admissionDate: data.admissionDate ? formatDate(data.admissionDate) : ''
+        admissionDate: data.admissionDate ? formatDate(data.admissionDate) : '',
+        admissionTime: data.admissionTime ? transformTimetoString(data.admissionTime) : '',
       }
       const response = await registerInRoomRequest(formData)
       if (response.msg === 'Patient registered') {
@@ -165,19 +172,20 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
             {errors.fechaIngreso && <p className="text-red-500 text-sm">{errors.fechaIngreso.message}</p> }
           </div>
 
-          {/* Campo de fecha de egreso */}
-          {/* <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Fecha de Egreso</label>
+          {/* Campo de hora de ingreso */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-1">Hora de Ingreso</label>
             <input
-              type="date"
-              name="departureDate"
+              type="time"
+              name="admissionTime"
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-sky-900 focus:ring-2 focus:outline-none"
-              {...register('departureDate', {
+              {...register('admissionTime', {
                 required: 'Este campo es requerido',
               })}
             />
-            {errors.fechaSalida && <p className="text-red-500 text-sm">{errors.fechaSalida.message}</p> }
-          </div> */}
+            {errors.horaIngreso && <p className="text-red-500 text-sm">{errors.horaIngreso.message}</p> }
+          </div>
+
 
           {/* Campo de observaciones */}
           <div className="mb-3">

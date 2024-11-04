@@ -46,6 +46,22 @@ export const generateReportRequest = async (roomNumber) => {
   return response.data
 }
 
+// Manage Rooms
+export const getAllRoomsRequest = async () => {
+  const response = await axios.get(`${administratorAPI}/rooms`, { withCredentials: true })
+  return response.data
+}
+
+export const createRoomRequest = async (data) => {
+  const response = await axios.post(`${administratorAPI}/create-room`, data, { withCredentials: true })
+  return response.data
+}
+
+export const deleteRoomRequest = async (id) => {
+  const response = await axios.delete(`${administratorAPI}/delete-room/${id}`, { withCredentials: true })
+  return response.data
+}
+
 // Supplies API
 
 export const getAllSuppliesRequest = async () => {
