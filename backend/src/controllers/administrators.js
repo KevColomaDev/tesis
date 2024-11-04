@@ -1,6 +1,7 @@
-import { administrators } from '../models/administrators.js'
+import { administrators, manageRooms } from '../models/administrators.js'
 import { validateLogin } from '../schemas/login.js'
 import { validateRegisterInRoom } from '../schemas/registerInRoom.js'
+import { validateRoom } from '../schemas/rooms.js'
 // import { validateRegisterPatient } from '../schemas/registerPatient.js'
 import jwt from 'jsonwebtoken'
 
@@ -29,41 +30,6 @@ export const login = async (req, res) => {
     console.log(error)
   }
 }
-
-/*
-export const registerPatient = async (req, res) => {
-  const validateDate = (date) => {
-    let regex = /^\d{1}\/\d{1}\/\d{4}$/
-    if (regex.test(date)) {
-      return date
-    } else {
-      regex = /^\d{2}\/\d{2}\/\d{4}$/
-      if (regex.test(date)) {
-        return date
-      }
-    }
-  }
-
-  try {
-    const patient = validateRegisterPatient(req.body)
-    console.log(patient)
-    if (!patient.name || !patient.habitation) {
-      return res.status(401).json({ msg: 'Neccesary name and habitation' })
-    }
-    const validAdmissionDate = validateDate(patient.admissionDate)
-    // const validDepartureDate = validateDate(patient.departureDate)
-
-    if (!validAdmissionDate) {
-      return res.status(401).json({ msg: 'Invalid admission date' })
-    }
-
-    await administrators.registerPatient(patient)
-    return res.status(200).json({ msg: 'Patient registered' })
-  } catch (error) {
-    console.log(error)
-  }
-}
-*/
 export const registerInRoom = async (req, res) => {
   const validateDate = (date) => {
     let regex = /^\d{1}\/\d{1}\/\d{4}$/
@@ -190,29 +156,38 @@ export const generateReport = async (req, res) => {
   }
 }
 
+// Manage Rooms
+
 export const createRoom = async (req, res) => {
   try {
-    const room = req.body
-    const isRoomCreated = await administrators.verifyRoom(room.h_number)
-    if (isRoomCreated) {
+    const room = validateRoom(req.body)
+    const roomExists = await administrators.verifyRoom(room.h_number)
+    if (roomExists) {
       return res.status(401).json({ msg: 'Room already exists' })
     }
-    const newRoom = await administrators.createRoom(room)
-    return res.status(200).json({ msg: 'Room created', newRoom })
+    await manageRooms.createRoom(room)
+    return res.status(200).json({ msg: 'Room created' })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Internal server error' })
+  }
+}
+
+export const deleteRoom = async (req, res) => {
+  try {
+    const hNumber = parseInt(req.params.hNumber)
+    await manageRooms.deleteRoom(hNumber)
+    return res.status(200).json({ msg: 'Room deleted' })
   } catch (error) {
     console.log(error)
   }
 }
 
-export const deletedRoom = async (req, res) => {
+export const getRooms = async (req, res) => {
   try {
-    const hNumber = parseInt(req.params.hNumber)
-    const isRoomCreated = await administrators.verifyRoom(hNumber)
-    if (!isRoomCreated) {
-      return res.status(401).json({ msg: 'Room does not exist' })
-    }
-    const deletedRoom = await administrators.deleteRoom(hNumber)
-    return res.status(200).json({ msg: 'Room deleted', deletedRoom })
+    const rooms = await manageRooms.getAllRooms()
+    console.log(rooms.length)
+    return res.status(200).json(rooms.length)
   } catch (error) {
     console.log(error)
   }

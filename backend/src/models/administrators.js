@@ -3,7 +3,7 @@ import { connectDB } from '../database.js'
 export const db = await connectDB()
 const collectionAdmin = db.collection('Administrators')
 const collectionPatients = db.collection('Patients')
-export const collectionRooms = db.collection('Rooms')
+export const collectionRooms = db.collection('Rooms2')
 
 export const administrators = {
   async login (email, password) {
@@ -54,6 +54,27 @@ export const administrators = {
       console.log(error)
     }
   },
+  async verifyRoom (hNumber) {
+    try {
+      const verifyRoom = await collectionRooms.findOne({ h_number: hNumber })
+      return verifyRoom
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+// Manage Rooms
+
+export const manageRooms = {
+  async getAllRooms () {
+    try {
+      const roomsData = await collectionRooms.find({}).toArray()
+      return roomsData
+    } catch (error) {
+      console.log(error)
+    }
+  },
   async createRoom (room) {
     try {
       const newRoom = await collectionRooms.insertOne(room)
@@ -66,14 +87,6 @@ export const administrators = {
     try {
       const deletedRoom = await collectionRooms.findOneAndDelete({ h_number: hNumber })
       return deletedRoom
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  async verifyRoom (hNumber) {
-    try {
-      const verifyRoom = await collectionRooms.findOne({ h_number: hNumber })
-      return verifyRoom
     } catch (error) {
       console.log(error)
     }
