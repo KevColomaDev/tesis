@@ -4,6 +4,7 @@ import { validateRegisterInRoom } from '../schemas/registerInRoom.js'
 import { validateRoom } from '../schemas/rooms.js'
 // import { validateRegisterPatient } from '../schemas/registerPatient.js'
 import jwt from 'jsonwebtoken'
+import { validateSocialWorker } from '../schemas/registerSocialWorker.js'
 
 export const login = async (req, res) => {
   try {
@@ -30,6 +31,46 @@ export const login = async (req, res) => {
     console.log(error)
   }
 }
+
+export const registerSocialWorker = async (req, res) => {
+  const socialWorkerValidation = validateSocialWorker(req.body)
+  console.log(socialWorkerValidation)
+}
+
+/*
+export const registerPatient = async (req, res) => {
+  const validateDate = (date) => {
+    let regex = /^\d{1}\/\d{1}\/\d{4}$/
+    if (regex.test(date)) {
+      return date
+    } else {
+      regex = /^\d{2}\/\d{2}\/\d{4}$/
+      if (regex.test(date)) {
+        return date
+      }
+    }
+  }
+
+  try {
+    const patient = validateRegisterPatient(req.body)
+    console.log(patient)
+    if (!patient.name || !patient.habitation) {
+      return res.status(401).json({ msg: 'Neccesary name and habitation' })
+    }
+    const validAdmissionDate = validateDate(patient.admissionDate)
+    // const validDepartureDate = validateDate(patient.departureDate)
+
+    if (!validAdmissionDate) {
+      return res.status(401).json({ msg: 'Invalid admission date' })
+    }
+
+    await administrators.registerPatient(patient)
+    return res.status(200).json({ msg: 'Patient registered' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+*/
 export const registerInRoom = async (req, res) => {
   const validateDate = (date) => {
     let regex = /^\d{1}\/\d{1}\/\d{4}$/
