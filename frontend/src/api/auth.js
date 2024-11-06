@@ -119,3 +119,15 @@ export const createCampaignRequest = async (data) => {
     return error
   }
 }
+
+// ---------------------------------- ESTO ----------------------------------------------------//
+
+export const verifyCedulaRequest = async (cedula) => {
+  try {
+    const response = await axios.post(`${donationsAPI}/verify`, { cedula },  { withCredentials: true }  );
+    return response.data;  
+  } catch (error) {
+    console.error("Error al verificar la cédula:", error.response || error.message);
+    return null; 
+  }
+};
