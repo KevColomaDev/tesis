@@ -61,11 +61,10 @@ const Donaciones = () => {
 
     const handleCedulaSubmit = async () => {
         try {
-            const response = await verifyCedulaRequest(cedula);  
-            
-            if (response && response.data) {  
-                setBeneficiaryData(response.data);  
-                setIsVerified(true);  
+            const response = await verifyCedulaRequest(cedula);
+            if (response) {  
+                setBeneficiaryData(response.beneficiary);  
+                setIsVerified(true);
             } else {
                 setBeneficiaryData(null);  
                 setIsVerified(false);  

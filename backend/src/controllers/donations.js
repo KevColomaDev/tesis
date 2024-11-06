@@ -58,8 +58,7 @@ export const createCampaign = async (req, res) => {
 // ---------------------------------- ESTO ----------------------------------------------------//
 
 export const verifyCedula = async (req, res) => {
-  const { cedula } = req.body;  
-
+  const { cedula } = req.body
 
   if (!cedula || typeof cedula !== 'string' || cedula.trim().length === 0) {
     return res.status(400).json({ msg: 'La cédula es obligatoria y debe ser válida' });
