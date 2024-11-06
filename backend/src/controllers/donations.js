@@ -1,6 +1,7 @@
 import { collectionCampaigns } from '../models/campaigns.js'
 import { donations, collectionDonations } from '../models/donations.js'
 import { validateCampaign } from '../schemas/createCampaign.js'
+import { beneficiaries } from '../models/beneficiaries.js';
 
 export const getCampaigns = async (req, res) => {
   try {
@@ -53,6 +54,39 @@ export const createCampaign = async (req, res) => {
     return res.status(500).json({ msg: 'Internal Server Error' })
   }
 }
+
+// ---------------------------------- ESTO ----------------------------------------------------//
+
+export const verifyCedula = async (req, res) => {
+  const { cedula } = req.body;  
+
+
+  if (!cedula || typeof cedula !== 'string' || cedula.trim().length === 0) {
+    return res.status(400).json({ msg: 'La cédula es obligatoria y debe ser válida' });
+  }
+
+  try {
+    const beneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+
+    if (beneficiary) {
+      return res.status(200).json({
+        found: true,
+        beneficiary: {
+          nombre: beneficiary.nombre,
+          apellido: beneficiary.apellido,
+          email: beneficiary.email,
+          telefono: beneficiary.telefono
+        }
+      });
+    } else {
+      return res.status(404).json({ found: false, msg: 'Beneficiario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error interno del servidor:', error);  
+    return res.status(500).json({ msg: 'Error interno del servidor', error: error.message });
+  }
+};
+
 
 export const assignBeneficiary = async (req, res) => {
   // try {
