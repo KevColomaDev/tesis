@@ -109,8 +109,8 @@ export const updatePatientStateRequest = async (data, state) => {
 
 // Manage Reports
 export const getReportsRequest = async (data) => {
-  const response = await axios.get(`${administratorAPI}/reports`, data, { withCredentials: true })
-  return response.data
+  const response = await axios.post(`${administratorAPI}/reports`, data, { withCredentials: true })
+  return response.data 
 }
 
 // Supplies API

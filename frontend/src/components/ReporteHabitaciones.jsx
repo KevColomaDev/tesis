@@ -1,13 +1,72 @@
 import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
+import { getReportsRequest } from '../api/auth';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 export const ReporteHabitaciones = ({ toggleReport }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log("Datos enviados:", data);
-    // Aquí iría el código para generar el reporte
+    try {
+      const response = await getReportsRequest(data);
+      console.log(response);
+  
+      const doc = new jsPDF();
+      let currentYPosition = 20; // Posición vertical inicial
+  
+      // Formatear las fechas al estilo "Noviembre 10 del 2024"
+      const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+  
+      // Forzar las fechas como locales eliminando cualquier posible cambio de zona horaria
+      const fechaInicial = new Date(data.fechaInicial + "T00:00:00");
+      const fechaFinal = new Date(data.fechaFinal + "T00:00:00");
+      
+      const fechaInicialFormateada = fechaInicial.toLocaleDateString('es-ES', opcionesFecha);
+      const fechaFinalFormateada = fechaFinal.toLocaleDateString('es-ES', opcionesFecha);
+  
+      // Encabezado del PDF
+      doc.setFontSize(15);
+      doc.text(`Reporte desde ${fechaInicialFormateada} hasta ${fechaFinalFormateada}`, 10, 10);
+  
+      response.forEach((item) => {
+        // Ajustar título para cada habitación
+        doc.setFontSize(12);
+        doc.text(`Habitación ${item.h_number}`, 10, currentYPosition);
+  
+        // Configuración de la tabla
+        doc.autoTable({
+          startY: currentYPosition + 10, // Posicionar la tabla debajo del título
+          head: [['Campo', 'Valor']],
+          body: [
+            ['H Número', item.h_number],
+            ['Nombre', item.name],
+            ['CI', item.ci],
+            ['Condición', item.condition],
+            ['Fecha de Admisión', item.admissionDate],
+            ['Hora de Admisión', item.admissionTime],
+            ['Fecha de Salida', item.departureDate],
+            ['Hora de Salida', item.departureTime],
+            ['Comida', item.food],
+            ['Observaciones', item.observations],
+          ],
+          margin: { top: 20 },
+        });
+  
+        // Actualizar la posición para la siguiente tabla, incluyendo espacio adicional
+        currentYPosition = doc.lastAutoTable.finalY + 20;
+      });
+  
+      // Guardar el PDF
+      doc.save('reporte.pdf');
+    } catch (error) {
+      console.log("Error al obtener los reportes:", error);
+    }
   };
+  
+  
+  
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
