@@ -10,6 +10,31 @@ export const loginRequest = async (user) => {
   const response = await axios.post(`${administratorAPI}/login`, user, { withCredentials: true })
   return response.data
 }
+export const getSocialWorkersRequest = async () =>{
+  try {
+    const response = await axios.get(`${administratorAPI}/social-workers`, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+}
+export const registerSocialWorkerRequest = async (data) => {
+  try {
+    const response = await axios.post(`${administratorAPI}/new-social-worker`, data, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+}
+export const deleteSocialWorkerRequest = async (id) => {
+  try {
+    const response = await axios.delete(`${administratorAPI}/social-worker/${id}`, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+  
+}
 
 export const dietDataRequest = async () => {
   const response = await axios.get(`${administratorAPI}/diet-data`, { withCredentials: true })

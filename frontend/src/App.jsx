@@ -12,6 +12,7 @@ import Donaciones from "./paginas/Donaciones";
 import AdminOptions from "./paginas/AdminOptions";
 import { SessionProvider } from "./context/SessionContext";
 import CreateUser from "./paginas/CreateUser";
+import UsersTable from "./paginas/UsersTable";
 
 const App = () => {
   return (
@@ -67,6 +68,15 @@ const App = () => {
               <>
                 <Header />
                 <CreateUser />
+              </>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <>
+                <Header />
+                <UsersTable />
               </>
             }
           />
