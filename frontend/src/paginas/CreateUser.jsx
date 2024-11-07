@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { registerSocialWorkerRequest } from "../api/auth";
 const CreateUser = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [isUser, setIsUser] = useState(true);
   const [formUser, setFormUser] = useState({
-    nombre: "",
-    apellido: "",
+    ci: null,
+    name: "",
+    lastname: "",
     email: "",
   });
   const [formAdmin, setFormAdmin] = useState({
@@ -20,8 +22,9 @@ const CreateUser = () => {
     if (e.target.value === "admin") {
       setIsUser(false);
       setFormUser({
-        nombre: "",
-        apellido: "",
+        ci: null,
+        name: "",
+        lastname: "",
         email: "",
       });
     } else {
@@ -44,36 +47,26 @@ const CreateUser = () => {
   const handleRegisterUser = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formUser),
-      };
-    //   const response = await fetch(
-    //     `${import.meta.env.VITE_BACKEND_URL}/admin/usuario`,
-    //     options
-    //   );
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     setSuccess(data.res);
-    //     setFormUser({
-    //       nombre: "",
-    //       apellido: "",
-    //       email: "",
-    //     });
-    //     setTimeout(() => {
-    //       setSuccess("");
-    //     }, 3000);
-    //   } else {
-    //     setError(data.msg);
-    //     setTimeout(() => {
-    //       setError("");
-    //     }, 3000);
-    //   }
+      const response = await registerSocialWorkerRequest(formUser)
+      console.log(response)
+      if (response.status === 200) {
+        setSuccess(response.data.msg);
+        setFormUser({
+          ci: 0,
+          name: "",
+          lastname: "",
+          email: "",
+        });
+        setTimeout(() => {
+          setSuccess("");
+        }, 3000);
+      } else {
+        console.log(response.msg)
+        setError(response.msg);
+        setTimeout(() => {
+          setError("");
+        }, 3000);
+      }
     } catch (error) {
       console.log(error);
     } finally{
@@ -198,9 +191,26 @@ const CreateUser = () => {
             name="typeSelected"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
-            <option value="user">Usuario</option>
+            <option value="user">Asistente Social</option>
             <option value="admin">Administrador</option>
           </select>
+        </div>
+        <div className={`mb-5 ${isUser ? "" : "hidden"}`}>
+          <label
+            htmlFor="ci"
+            className="block mb-2 text-sm font-medium text-gray-900"
+          >
+            CI
+          </label>
+          <input
+            type="number"
+            name="ci"
+            min={0}
+            value={formUser.ci}
+            onChange={handleChangeUser}
+            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            required
+          />
         </div>
         <div className={`mb-5 ${isUser ? "" : "hidden"}`}>
           <label
@@ -211,8 +221,8 @@ const CreateUser = () => {
           </label>
           <input
             type="text"
-            name="nombre"
-            value={formUser.nombre}
+            name="name"
+            value={formUser.name}
             onChange={handleChangeUser}
             className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             required
@@ -227,8 +237,8 @@ const CreateUser = () => {
           </label>
           <input
             type="text"
-            name="apellido"
-            value={formUser.apellido}
+            name="lastname"
+            value={formUser.lastname}
             onChange={handleChangeUser}
             className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             required
@@ -291,7 +301,7 @@ const CreateUser = () => {
           }`}
           disabled={loading}
         >
-          {loading ? "Registrando..." : "Registrar Usuario"}
+          {loading ? "Registrando..." : "Registrar Asistente Social"}
         </button>
         <button
           type="button"

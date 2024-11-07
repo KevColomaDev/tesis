@@ -10,6 +10,31 @@ export const loginRequest = async (user) => {
   const response = await axios.post(`${administratorAPI}/login`, user, { withCredentials: true })
   return response.data
 }
+export const getSocialWorkersRequest = async () =>{
+  try {
+    const response = await axios.get(`${administratorAPI}/social-workers`, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+}
+export const registerSocialWorkerRequest = async (data) => {
+  try {
+    const response = await axios.post(`${administratorAPI}/new-social-worker`, data, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+}
+export const deleteSocialWorkerRequest = async (id) => {
+  try {
+    const response = await axios.delete(`${administratorAPI}/social-worker/${id}`, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
+  
+}
 
 export const dietDataRequest = async () => {
   const response = await axios.get(`${administratorAPI}/diet-data`, { withCredentials: true })
@@ -60,6 +85,32 @@ export const createRoomRequest = async (data) => {
 export const deleteRoomRequest = async (id) => {
   const response = await axios.delete(`${administratorAPI}/delete-room/${id}`, { withCredentials: true })
   return response.data
+}
+
+
+
+// Manage Patients
+export const createPatientRequest = async (data) => {
+  const response = await axios.post(`${administratorAPI}/create-patient`, data, { withCredentials: true })
+  return response.data
+}
+
+export const getPatientByCiRequest = async (data) => {
+  const response = await axios.get(`${administratorAPI}/patient/${data}`, { withCredentials: true })
+  console.log(response);
+  return response.data
+}
+
+export const updatePatientStateRequest = async (data, state) => {
+  console.log('CI', data);
+  const response = await axios.put(`${administratorAPI}/update-patient-state/${data}`, state, { withCredentials: true })
+  return response.data
+}
+
+// Manage Reports
+export const getReportsRequest = async (data) => {
+  const response = await axios.post(`${administratorAPI}/reports`, data, { withCredentials: true })
+  return response.data 
 }
 
 // Supplies API

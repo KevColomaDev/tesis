@@ -4,6 +4,8 @@ import { validateAddSupplies } from '../schemas/addSupplies.js'
 import mongoose from 'mongoose'
 import { validateAssignSupplies } from '../schemas/assignSupplies.js'
 import { collectionReportsSupplies } from '../models/reportsSupplies.js'
+import { socialWorkers } from '../models/socialWorkers.js'
+import { sendSupplyShortageNotification } from '../config/nodemailer.js'
 
 export const getSupplies = async (req, res) => {
   try {
@@ -103,9 +105,14 @@ export const assignSupplies = async (req, res) => {
             { name: assignInput.supplies[i].name },
             { $set: { quantity: quantity - assignInput.supplies[i].quantity } },
             { returnDocument: 'after' })
+          // Send emails to notify
+          if (updatedSupply.quantity < 10) {
+            await sendMailsToSocialWorkers(updatedSupply.name)
+          }
           updatedSupplies.push(updatedSupply)
         }
       } catch (error) {
+        console.log(error)
         return res.status(400).json({ msg: 'Supply or supplies doesnt exist.' })
       }
     }
@@ -119,5 +126,13 @@ export const assignSupplies = async (req, res) => {
     return res.status(200).json(report)
   } catch (error) {
     console.log(error)
+  }
+}
+
+// Helpers
+const sendMailsToSocialWorkers = async (supply) => {
+  const allSocialWorkers = await socialWorkers.getSocialWorkers()
+  for (let i = 0; i < allSocialWorkers.length; i++) {
+    sendSupplyShortageNotification(allSocialWorkers[i].email, supply)
   }
 }

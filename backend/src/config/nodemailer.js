@@ -39,7 +39,7 @@ export const sendSupplyShortageNotification = (userMail, supplyItem) => {
         subject: "¡Alerta de escasez de suministros!",
         html: `<p>Hola, se ha detectado que queda poca cantidad del suministro: <strong>${supplyItem}</strong>. Por favor, considera reabastecerlo.</p>`,
     };
-
+    
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.log(error);
@@ -48,3 +48,44 @@ export const sendSupplyShortageNotification = (userMail, supplyItem) => {
         }
     });
 };
+
+export const sendMailToAdmin = (userMail, password) => {
+  const mailOptions = {
+    from: process.env.USER_MAILTRAP,
+    to: userMail,
+    subject: '¡Bienvenido al equipo!',
+    html: `<p>Has sido registrado en Solca, ya puedes ingresar sesión con las siguientes credenciales:</p>
+    <p>Correo electrónico: ${userMail}</p>
+    <p>Contraseña: ${password}</p>
+    <p>No olvides restablecer tu contraseña.`
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error)
+    } else {
+      console.log('Correo de registro exitoso enviado: ' + info.response)
+    }
+  })
+}
+
+export const sendMailToSocialWorker = (userMail, password, token) => {
+  const mailOptions = {
+    from: process.env.USER_MAILTRAP,
+    to: userMail,
+    subject: '¡Bienvenido al equipo!',
+    html: `<p>Has sido registrado en Solca para ingresar nuestra plataforma verifica tu correo mediante el siguiente link: ${process.env.URL_FRONTEND}verificar-token/${token}</p>
+    <br>
+    <p style="font-weight: bold;">Tus credenciales son las siguientes:</p>
+    <p>Correo electrónico: ${userMail}</p>
+    <p>Contraseña: ${password}</p>
+    <p>No olvides restablecer tu contraseña.`
+  }
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error)
+    } else {
+      console.log('Correo de registro exitoso enviado: ' + info.response)
+    }
+  })
+}

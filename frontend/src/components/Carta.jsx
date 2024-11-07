@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import Formulario from './Formulario';
 import PropTypes from 'prop-types';
 import { InfoContext } from '../context/InfoContext';
+import { setParamsInBlankRequest } from '../api/auth';
 
 const Carta = (props) => {
   const { name, ci, condition, food, admissionDate, room, observations, admissionTime, departureDate, departureTime } = props;
@@ -19,6 +20,22 @@ const Carta = (props) => {
     updateDietData();
     setIsFormVisible(false);
   };
+  const onClickDelete = async (roomNumber) => {
+    const confirmed = window.confirm("¿Estás seguro de que quieres dar de alta?");
+    
+    if (confirmed) {
+      try {
+        const response = await setParamsInBlankRequest(roomNumber);
+        if (response) {
+          setFormData(response);
+          updateDietData();
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+
 
   useEffect(() => {
     // Actualizar `isOpaque` cada vez que `formData.name` cambia
@@ -41,6 +58,14 @@ const Carta = (props) => {
           initialData={formData} 
           onComplete={handleFormComplete} 
         />
+      )}
+      {formData.name && formData.name !== '---' && (
+        <button
+          onClick={() => onClickDelete(room)}
+          className="px-4 py-2 bg-rose-500 mt-2 text-white rounded-md hover:bg-rose-950"
+        >
+          Dar de alta
+        </button>
       )}
     </div>
   );
