@@ -192,7 +192,8 @@ const Suministros = () => {
                   value={formAssign[supply[1].name]}
                   onChange={handleChangeAssign}
                   type="number"
-                  max="99"
+                  min={0}
+                  max={99}
                   className="w-20 p-2 border rounded-md"
                 />
               </label>

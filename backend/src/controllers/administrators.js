@@ -5,6 +5,10 @@ import { validateRoom } from '../schemas/rooms.js'
 import { validateRegisterPatient } from '../schemas/registerPatient.js'
 import { validateReport } from '../schemas/roomsReport.js'
 import jwt from 'jsonwebtoken'
+import { validateSocialWorker } from '../schemas/registerSocialWorker.js'
+import { collectionSocialWorkers, socialWorkers } from '../models/socialWorkers.js'
+import { sendMailToSocialWorker } from '../config/nodemailer.js'
+import mongoose from 'mongoose'
 
 export const login = async (req, res) => {
   try {
@@ -31,6 +35,106 @@ export const login = async (req, res) => {
     console.log(error)
   }
 }
+export const getSocialWorkers = async (req, res) => {
+  const allSocialWorkers = await socialWorkers.getSocialWorkers()
+  return res.status(200).json(allSocialWorkers)
+}
+export const registerSocialWorker = async (req, res) => {
+  const socialWorkerValidation = validateSocialWorker(req.body)
+  if (Object.keys(socialWorkerValidation).includes('issues')) {
+    return res.status(400).json(socialWorkerValidation.errors)
+  }
+  // Verify if CI exists
+  const ci = await collectionSocialWorkers.findOne({ ci: socialWorkerValidation.ci })
+  if (ci) { return res.status(400).json({ msg: 'CI already exists' }) }
+  // Verify if email exists
+  const verifyEmail = await collectionSocialWorkers.findOne({ email: socialWorkerValidation.email })
+  if (verifyEmail) { return res.status(400).json({ msg: 'Email already exists' }) }
+  const password = Math.random().toString(36).slice(-8)
+  const encryptPassword = await socialWorkers.encryptPassword(password)
+  socialWorkerValidation.password = encryptPassword
+  await collectionSocialWorkers.insertOne(socialWorkerValidation)
+  const token = await socialWorkers.createToken(socialWorkerValidation.ci)
+
+  sendMailToSocialWorker(socialWorkerValidation.email, password, token)
+
+  res.status(200).json({ msg: 'An email was sent to the social worker.' })
+}
+export const deleteSocialWorker = async (req, res) => {
+  const { id } = req.params
+  if (!mongoose.isValidObjectId(id)) { return res.status(400).json({ msg: 'Not valid ID' }) }
+  try {
+    const deletedSocialWorker = await collectionSocialWorkers.findOneAndDelete({ _id: new mongoose.Types.ObjectId(id) })
+    if (!deletedSocialWorker) {
+      return res.status(400).json({ msg: 'Social Worker doesnt exists.' })
+    }
+    return res.status(200).json({ msg: 'Social Worker deleted successfully.' })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ msg: error.message })
+  }
+}
+const registerAdministrator = async (req,res) => {
+  // const {
+  //   nombre_usuario,
+  //   password,
+  //   email
+  // } = req.body
+
+  // if (Object.values(req.body).includes('')) { return res.status(400).json({ msg: 'Lo sentimos, debes llenar todos los campos' }) }
+  // const verificarNombreUsuario = await Administradores.findOne({nombre_usuario})
+  // if(verificarNombreUsuario) {return res.status(400).json({msg:"Lo sentimos, el nombre de usuario ya existe"})}
+
+  // const verificarEmail = await Administradores.findOne({email})
+  // if(verificarEmail) {return res.status(400).json({msg:"Lo sentimos, el email ya existe"})}
+  
+  // const admin = new Administradores({
+  //     nombre_usuario,
+  //     password,
+  //     email
+  // })
+
+  // admin.password = await admin.encrypPassword(password)
+  // const token = admin.crearToken()
+  // await admin.save()
+  // sendMailToAdmin(email,token)
+
+  // res.status(200).json({res:'Registro exitoso, se ha enviado un correo electrónico al administrador.'})
+}
+/*
+export const registerPatient = async (req, res) => {
+  const validateDate = (date) => {
+    let regex = /^\d{1}\/\d{1}\/\d{4}$/
+    if (regex.test(date)) {
+      return date
+    } else {
+      regex = /^\d{2}\/\d{2}\/\d{4}$/
+      if (regex.test(date)) {
+        return date
+      }
+    }
+  }
+
+  try {
+    const patient = validateRegisterPatient(req.body)
+    console.log(patient)
+    if (!patient.name || !patient.habitation) {
+      return res.status(401).json({ msg: 'Neccesary name and habitation' })
+    }
+    const validAdmissionDate = validateDate(patient.admissionDate)
+    // const validDepartureDate = validateDate(patient.departureDate)
+
+    if (!validAdmissionDate) {
+      return res.status(401).json({ msg: 'Invalid admission date' })
+    }
+
+    await administrators.registerPatient(patient)
+    return res.status(200).json({ msg: 'Patient registered' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+*/
 export const registerInRoom = async (req, res) => {
   const validateDate = (date) => {
     let regex = /^\d{1}\/\d{1}\/\d{4}$/
