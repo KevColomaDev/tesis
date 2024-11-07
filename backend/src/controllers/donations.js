@@ -2,6 +2,7 @@ import { collectionCampaigns } from '../models/campaigns.js'
 import { donations, collectionDonations } from '../models/donations.js'
 import { validateCampaign } from '../schemas/createCampaign.js'
 import { beneficiaries } from '../models/beneficiaries.js';
+import { reportDonations } from '../models/reportsDonations.js';
 
 export const getCampaigns = async (req, res) => {
   try {
@@ -55,7 +56,7 @@ export const createCampaign = async (req, res) => {
   }
 }
 
-// ---------------------------------- ESTO ----------------------------------------------------//
+
 
 export const verifyCedula = async (req, res) => {
   const { cedula } = req.body
@@ -86,8 +87,75 @@ export const verifyCedula = async (req, res) => {
   }
 };
 
+export const createBeneficiary = async (req, res) => {
+  const { cedula, nombre, apellido, email, telefono } = req.body;
 
-export const assignBeneficiary = async (req, res) => {
+  if (!cedula || !nombre || !apellido || !email || !telefono) {
+    return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+    if (existingBeneficiary) {
+      return res.status(400).json({ msg: 'El beneficiario ya existe' });
+    }
+
+    const newBeneficiary = await beneficiaries.createBeneficiary({ cedula, nombre, apellido, email, telefono });
+    return res.status(201).json({ msg: 'Beneficiario creado exitosamente', beneficiary: newBeneficiary });
+  } catch (error) {
+    console.error('Error al crear el beneficiario:', error);
+    return res.status(500).json({ msg: 'Error al crear el beneficiario', error: error.message });
+  }
+}
+
+/// -------------------------------------Borrar esto si no funciona-------------------------------------
+
+export const assignItemsToBeneficiary = async (req, res) => {
+  const { cedula, nombre, email, telefono, items } = req.body;
+
+  if (!cedula || !nombre || !email || !telefono || !items || items.length === 0) {
+    return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    // Verificar si el beneficiario existe (se puede usar el mismo procedimiento que para crear beneficiarios)
+    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+    if (!existingBeneficiary) {
+      return res.status(404).json({ msg: 'Beneficiario no encontrado' });
+    }
+
+    // Crear el reporte de donación en reportDonations
+    const report = await reportDonations.createReport({
+      cedula,
+      nombre,
+      email,
+      telefono,
+      items,
+    });
+
+    // Actualizar la cantidad de los ítems en la colección Donations
+    for (let item of items) {
+      const donationItem = await donations.getItemByName(item.name);
+      if (donationItem) {
+        // Restar la cantidad entregada de la cantidad disponible
+        const updatedQuantity = donationItem.quantity - item.quantity;
+        if (updatedQuantity < 0) {
+          return res.status(400).json({ msg: `No hay suficiente cantidad de ${item.name}` });
+        }
+
+        // Actualizar la cantidad del ítem en Donations
+        await donations.updateItemQuantity(item.name, updatedQuantity);
+      }
+    }
+
+    return res.status(201).json({ msg: 'Ítems entregados al beneficiario', report });
+  } catch (error) {
+    console.error('Error al entregar los ítems:', error);
+    return res.status(500).json({ msg: 'Error al entregar los ítems', error: error.message });
+  }
+};
+
+//export const assignBeneficiary = async (req, res) => {
   // try {
   //   const suppliesInput = validateAddSupplies(req.body)
   //   console.log(suppliesInput)
@@ -107,4 +175,4 @@ export const assignBeneficiary = async (req, res) => {
   // } catch (error) {
   //   console.log(error)
   // }
-}
+//}
