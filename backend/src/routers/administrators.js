@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { login, registerInRoom, getDataRoom, setParamsinBlank, dietData, logout, verifyToken, generateReport, createRoom, getRooms, deleteRoom } from '../controllers/administrators.js'
+import { login, registerInRoom, getDataRoom, setParamsinBlank, dietData, logout, verifyToken, generateReport, createRoom, getRooms, deleteRoom, registerSocialWorker, deleteSocialWorker, getSocialWorkers } from '../controllers/administrators.js'
 import { authLogin } from '../middlewares/authLogin.js'
 
 export const router = Router()
@@ -19,3 +19,8 @@ router.get('/generate-report/:hNumber', authLogin, generateReport)
 router.post('/create-room', authLogin, createRoom)
 router.get('/rooms', authLogin, getRooms)
 router.delete('/delete-room/:hNumber', authLogin, deleteRoom)
+
+// Social Workers
+router.get('/social-workers', authLogin, getSocialWorkers)
+router.post('/new-social-worker', authLogin, registerSocialWorker)
+router.delete('/social-worker/:id', authLogin, deleteSocialWorker)
