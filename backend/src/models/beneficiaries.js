@@ -41,5 +41,18 @@ export const beneficiaries = {
       return error;
     }
   },
+
+  async updateBeneficiaryByCedula(cedula, data) {
+    try {
+      const result = await collectionBeneficiaries.updateOne(
+        { cedula },
+        { $set: data }
+      );
+      return result.modifiedCount > 0; // Retorna true si se actualizó
+    } catch (error) {
+      console.log(error.message);
+      return error;
+    }
+  }
 }
 

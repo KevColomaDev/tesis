@@ -108,52 +108,41 @@ export const createBeneficiary = async (req, res) => {
   }
 }
 
-/// -------------------------------------Borrar esto si no funciona-------------------------------------
+export const updateBeneficiary = async (req, res) => {
+  const { cedula, nombre, apellido, email, telefono } = req.body;
 
-export const assignItemsToBeneficiary = async (req, res) => {
-  const { cedula, nombre, email, telefono, items } = req.body;
-
-  if (!cedula || !nombre || !email || !telefono || !items || items.length === 0) {
-    return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
+  if (!cedula) {
+    return res.status(400).json({ msg: 'La cédula es obligatoria' });
   }
 
   try {
-    // Verificar si el beneficiario existe (se puede usar el mismo procedimiento que para crear beneficiarios)
     const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
     if (!existingBeneficiary) {
       return res.status(404).json({ msg: 'Beneficiario no encontrado' });
     }
 
-    // Crear el reporte de donación en reportDonations
-    const report = await reportDonations.createReport({
-      cedula,
-      nombre,
-      email,
-      telefono,
-      items,
-    });
+    const updatedData = {
+      ...(nombre && { nombre }),
+      ...(apellido && { apellido }),
+      ...(email && { email }),
+      ...(telefono && { telefono })
+    };
 
-    // Actualizar la cantidad de los ítems en la colección Donations
-    for (let item of items) {
-      const donationItem = await donations.getItemByName(item.name);
-      if (donationItem) {
-        // Restar la cantidad entregada de la cantidad disponible
-        const updatedQuantity = donationItem.quantity - item.quantity;
-        if (updatedQuantity < 0) {
-          return res.status(400).json({ msg: `No hay suficiente cantidad de ${item.name}` });
-        }
+    await beneficiaries.updateBeneficiaryByCedula(cedula, updatedData);
 
-        // Actualizar la cantidad del ítem en Donations
-        await donations.updateItemQuantity(item.name, updatedQuantity);
-      }
-    }
-
-    return res.status(201).json({ msg: 'Ítems entregados al beneficiario', report });
+    return res.status(200).json({ msg: 'Beneficiario actualizado exitosamente', updatedData });
   } catch (error) {
-    console.error('Error al entregar los ítems:', error);
-    return res.status(500).json({ msg: 'Error al entregar los ítems', error: error.message });
+    console.error('Error al actualizar el beneficiario:', error);
+    return res.status(500).json({ msg: 'Error al actualizar el beneficiario', error: error.message });
   }
 };
+
+
+
+
+/// -------------------------------------Borrar esto si no funciona-------------------------------------
+
+
 
 //export const assignBeneficiary = async (req, res) => {
   // try {
