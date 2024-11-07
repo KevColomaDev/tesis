@@ -142,12 +142,13 @@ export const createBeneficiaryRequest = async (data) => {
   }
 };
 
-export const assignItemsToBeneficiaryRequest = async (data) => {
+export const updateBeneficiaryRequest = async (data) => {
   try {
-    const response = await axios.post(`${donationsAPI}/assign-items`, data, { withCredentials: true });
+    const response = await axios.put(`${donationsAPI}/update-beneficiary`, data, { withCredentials: true });
     return response.data;
   } catch (error) {
-    console.error("Error al asignar ítems al beneficiario:", error.response ? error.response.data : error.message);
+    console.error("Error al actualizar el beneficiario:", error.response ? error.response.data : error.message);
     return null;
   }
 };
+

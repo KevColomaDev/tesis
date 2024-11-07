@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Reporte from '../components/Reporte';
-import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, assignItemsToBeneficiaryRequest } from '../api/auth';
+import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest } from '../api/auth';
 
 
 // Falta corriguir que deje enviar los datos con el @ //
@@ -30,16 +30,33 @@ const Donaciones = () => {
     const [email, setEmail] = useState("");
     const [telefono, setTelefono] = useState("");
 
-    const [message, setMessage] = useState('');
-
     const [isCedulaNotFound, setIsCedulaNotFound] = useState(false);
 
-    const [itemQuantityBeneficiarie, setItemQuantityBeneficiarie] = useState(0)
-    const [itemsBeneficiarie, setItemsBeneficiarie] = useState([])
-    const [itemNameBeneficiarie, setItemNameBeneficiarie] = useState('')
-    const [isOtherItemBeneficiarie, setIsOtherItemBeneficiarie] = useState(true);
+    const [donationItems, setDonationItems] = useState([]);  // Para la lista de donaciones
+const [donationCedula, setDonationCedula] = useState("");  // Para la cédula
+const [donationItemName, setDonationItemName] = useState("");  // Nombre del artículo
+const [donationItemQuantity, setDonationItemQuantity] = useState(0);  // Cantidad del artículo
+ 
 
-    
+
+    const handleAddDonationItem = () => {
+        if (donationItemQuantity > 0 && donationItemQuantity < 100) {
+            // Agregar artículo a la lista de donaciones
+            const newDonationItems = [...donationItems, { name: donationItemName, quantity: Number(donationItemQuantity) }];
+            setDonationItems(newDonationItems);
+            setDonationItemQuantity(0);
+            setDonationItemName("");  // Limpiar campo de nombre del artículo
+        } else {
+            alert("Cantidad no válida, debe ser entre 1 y 99.");
+        }
+    };
+
+    const handleRemoveDonationItem = (index) => {
+        const updatedItems = [...donationItems];
+        updatedItems.splice(index, 1); // Elimina el ítem en el índice dado
+        setDonationItems(updatedItems); // Actualiza el estado con la nueva lista
+    };
+
 
     const toggleReport = () => {
         setShowReport(!showReport);
@@ -72,27 +89,8 @@ const Donaciones = () => {
             }
         }
     };
-
-    const handleChangeBeneficiarie = (e) => {
-        const selectedValue = e.target.value;
-    
-        if (selectedValue === 'Otro') {
-            setIsOtherItemBeneficiarie(true);
-            setItemNameBeneficiarie(''); 
-        } else {
-            setIsOtherItemBeneficiarie(false);
-            setNewItemNameBeneficiarie(''); 
-            setItemNameBeneficiarie(selectedValue);
-    
-            if (selectedValue === 'Dinero') {
-                setItemQuantityBeneficiarie(''); 
-            } else {
-                setItemQuantityBeneficiarie('');
-            }
-        }
-    };
-    const handleChangeQuantity = (e) => { setItemQuantity(e.target.value) }
-    const handleChangeQuantityBeneficiarie= (e) => { setItemQuantityBeneficiarie(e.target.value) }
+ 
+    const handleChangeQuantity = (e) => { setItemQuantity(e.target.value) } 
     const handleChangeNewItemName = (e) =>{ setNewItemName(e.target.value) }
     const handleCamapaignName = e => { setCampaignName(e.target.value) }
 
@@ -143,7 +141,27 @@ const Donaciones = () => {
       };
 
 
-
+const handleUpdateBeneficiary = async () => {
+        try {
+            const updatedData = {
+                cedula,
+                nombre: beneficiaryData.nombre,
+                apellido: beneficiaryData.apellido,
+                email: beneficiaryData.email,
+                telefono: beneficiaryData.telefono,
+            };
+            
+            const response = await updateBeneficiaryRequest(updatedData);
+            if (response) {
+                alert("Beneficiario actualizado exitosamente");
+            } else {
+                alert("Error al actualizar el beneficiario");
+            }
+        } catch (error) {
+            console.error("Error al actualizar el beneficiario:", error);
+            alert("Hubo un error al actualizar el beneficiario");
+        }
+    };
 
    
 
@@ -152,12 +170,7 @@ const Donaciones = () => {
     newItems.splice(index, 1);  
     setItems(newItems);  
     };
-
-    const handleRemoveItemBeneficiarie = (index) => {
-        const newItemsBeneficiarie = [...items];  
-        newItemsBeneficiarie.splice(index, 1);  
-        setItemsBeneficiarie(newItems);  
-        };
+ 
 
     const handleClickItem = () => {
         if (itemQuantity > 0 && itemQuantity < 100){
@@ -180,26 +193,7 @@ const Donaciones = () => {
         }
     }
 
-    const handleClickItemBeneficiarie = () => {
-        if (itemQuantityBeneficiarie > 0 && itemQuantityBeneficiarie < 100){
-            // If item already exists add the quantity to them
-            if (itemsBeneficiarie.find(item => item.name === itemNameBeneficiarie)){
-                const newItems = items.map(item => {
-                    if(item.name === itemNameBeneficiarie){
-                        item.quantity = Number(item.quantity) + Number(itemQuantityBeneficiarie)
-                    }
-                    return item
-                })
-                setItemsBeneficiarie(newItems)
-            }else{
-                items.push({name:itemNameBeneficiarie, quantity: Number(itemQuantityBeneficiarie)})
-            }
-            setItemQuantityBeneficiarie(0)
-        } else {
-            setValidInput(false);
-            setTimeout(() => setValidInput(true),2000)
-        }
-    }
+ 
 
     const handleClickNewItem = () => {
         if (itemQuantity > 0 && itemQuantity < 100){
@@ -264,13 +258,12 @@ const Donaciones = () => {
             >
                 Generar Reporte
             </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full justify-items-center"> {/* Responsivo: 1 columna en móviles, 2 en pantallas más grandes */}
+    
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center"> {/* Ajuste a 3 columnas en pantallas grandes */}
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
                     <h3 className="text-lg font-semibold mb-4 text-center">Campaña</h3>
                     <div className="space-y-4 w-full">
                         <label className="flex justify-between items-center">
-                            
                             <input onChange={handleCamapaignName} value={campaignName} type="text" placeholder="Nombre de la Campaña" className="w-full ml-1 p-1 border rounded-md" />
                         </label>
                         {items.map((item, index) => (
@@ -280,7 +273,7 @@ const Donaciones = () => {
                                 <button 
                                     onClick={() => handleRemoveItem(index)} 
                                     className="w-8 h-8 bg-red-500 text-white font-bold rounded-md hover:bg-red-700 flex items-center justify-center text-xl"
-                                    style={{ marginLeft: '10px' }} // Ajustar margen izquierdo
+                                    style={{ marginLeft: '10px' }}
                                 >
                                     -
                                 </button>
@@ -300,7 +293,7 @@ const Donaciones = () => {
                                 type="number" 
                                 max="99" 
                                 min="0" 
-                                step={selectedItem === "Dinero" ? "0.01" : "1"} // Permitir decimales solo si "Dinero" está seleccionado
+                                step={selectedItem === "Dinero" ? "0.01" : "1"} 
                                 className={`w-24 p-2 border rounded-md ${!validInput ? 'border-red-500' : ''}`} 
                                 placeholder="Cantidad" 
                             />
@@ -310,20 +303,20 @@ const Donaciones = () => {
                         </label>
                         {isOtherItem && (
                             <label className="flex justify-between">
-                            <input 
-                                type="text" 
-                                onChange={handleChangeNewItemName} 
-                                value={newItemName} 
-                                className={`w-full mr-2 p-2 border rounded-md ${!validInputName ? 'border-red-500' : ''}`} 
-                                placeholder="Nombre del nuevo item"
-                            />
-                            <button 
-                                onClick={handleClickNewItem} 
-                                className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950"
-                            >
-                                +
-                            </button>
-                        </label>
+                                <input 
+                                    type="text" 
+                                    onChange={handleChangeNewItemName} 
+                                    value={newItemName} 
+                                    className={`w-full mr-2 p-2 border rounded-md ${!validInputName ? 'border-red-500' : ''}`} 
+                                    placeholder="Nombre del nuevo item"
+                                />
+                                <button 
+                                    onClick={handleClickNewItem} 
+                                    className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950"
+                                >
+                                    +
+                                </button>
+                            </label>
                         )}
                         <div className="flex justify-center">
                             <button
@@ -335,162 +328,198 @@ const Donaciones = () => {
                         </div>
                     </div>
                 </div>
-
-
+    
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
-                <h3 className="text-lg font-semibold mb-4 text-center">Beneficiario</h3>
-                <form className="space-y-4 w-full">
-                    <label className="flex justify-between items-center">
-                        
-                        <div className="flex items-center w-full">
+                    <h3 className="text-lg font-semibold mb-4 text-center">Beneficiarios</h3>
+                    <form className="space-y-4 w-full">
+                        <label className="flex justify-between items-center">
+                            <div className="flex items-center w-full">
+                                <input
+                                    type="text"
+                                    value={cedula}
+                                    onChange={(e) => setCedula(e.target.value)}
+                                    className="w-3/4 p-1 border rounded-md"
+                                    placeholder="Ingrese la cédula"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleCedulaSubmit}
+                                    className="w-1/4 ml-2 px-4 py-1 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                >
+                                    Verificar
+                                </button>
+                            </div>
+                        </label>
+    
+                        {isVerified && (
+                            <div className="mt-4 space-y-2">
+                                {beneficiaryData && (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <label className="w-1/3">Nombre:</label>
+                                            <input
+                                                type="text"
+                                                value={beneficiaryData.nombre}
+                                                onChange={(e) => setBeneficiaryData({ ...beneficiaryData, nombre: e.target.value })}
+                                                className="w-2/3 p-1 border rounded-md"
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <label className="w-1/3">Apellido:</label>
+                                            <input
+                                                type="text"
+                                                value={beneficiaryData.apellido}
+                                                onChange={(e) => setBeneficiaryData({ ...beneficiaryData, apellido: e.target.value })}
+                                                className="w-2/3 p-1 border rounded-md"
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <label className="w-1/3">Email:</label>
+                                            <input
+                                                type="email"
+                                                value={beneficiaryData.email}
+                                                onChange={(e) => setBeneficiaryData({ ...beneficiaryData, email: e.target.value })}
+                                                className="w-2/3 p-1 border rounded-md"
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <label className="w-1/3">Teléfono:</label>
+                                            <input
+                                                type="text"
+                                                value={beneficiaryData.telefono}
+                                                onChange={(e) => setBeneficiaryData({ ...beneficiaryData, telefono: e.target.value })}
+                                                className="w-2/3 p-1 border rounded-md"
+                                            />
+                                        </div>
+                                        <div className="flex justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={handleUpdateBeneficiary}
+                                            className="mt-4 px-9 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                        >
+                                            Guardar
+                                        </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+    
+                        {isCedulaNotFound && (
+                            <div className="mt-4 space-y-4">
+                                <input
+                                    type="text"
+                                    placeholder="Nombre"
+                                    value={nombre}
+                                    onChange={(e) => setNombre(e.target.value)}
+                                    className="w-full p-1 border rounded-md"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Apellido"
+                                    value={apellido}
+                                    onChange={(e) => setApellido(e.target.value)}
+                                    className="w-full p-1 border rounded-md"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Correo"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full p-1 border rounded-md"
+                                />
+                                <input
+                                    type="tel"
+                                    placeholder="Teléfono"
+                                    value={telefono}
+                                    onChange={(e) => setTelefono(e.target.value)}
+                                    className="w-full p-1 border rounded-md"
+                                />
+                                <div className="flex justify-center items-center h-full">
+                                    <button
+                                        onClick={handleCreateBeneficiary}
+                                        className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                    >
+                                        Crear beneficiario
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+    
+                    </form>
+                </div>
+    
+                <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
+                    <h3 className="text-lg font-semibold mb-4 text-center">Donaciones</h3>
+                    <form className="space-y-7 w-full">
+                        {/* Campo para cédula */}
+                        <label className="flex justify-between items-center">
                             <input
                                 type="text"
-                                value={cedula}
-                                onChange={(e) => setCedula(e.target.value)}
-                                className="w-3/4 p-1 border rounded-md"
+                                value={donationCedula}
+                                onChange={(e) => setDonationCedula(e.target.value)}
+                                className="w-full p-1 border rounded-md"
                                 placeholder="Ingrese la cédula"
+                            />
+                        </label>
+
+                        {/* Selección de objetos */}
+                        <label className="flex justify-between items-center">
+                            <select onChange={(e) => setDonationItemName(e.target.value)} value={donationItemName} className="w-40 p-2 border rounded-md">
+                                {donations.map(donation => (
+                                    <option key={donation[1]._id} value={donation[1].name}>{donation[1].name}</option>
+                                ))}
+                            </select>
+                            <input
+                                value={donationItemQuantity}
+                                onChange={(e) => setDonationItemQuantity(e.target.value)}
+                                type="number"
+                                min="1"
+                                max="99"
+                                className="w-24 p-2 border rounded-md"
+                                placeholder="Cantidad"
                             />
                             <button
                                 type="button"
-                                onClick={handleCedulaSubmit}
-                                className="w-1/4 ml-2 px-4 py-1 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                onClick={handleAddDonationItem}
+                                className="px-4 py-2 bg-sky-800 text-white  rounded-md hover:bg-sky-950"
                             >
-                                Verificar
+                                Agregar
                             </button>
-                        </div>
-                    </label>
+                        </label>
 
-                    {isVerified && (
-                        <div className="mt-4 space-y-2">
-                            {/* Información del beneficiario */}
-                            {beneficiaryData && (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                        <span>Nombre:</span>
-                                        <span>{beneficiaryData.nombre}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Apellido:</span>
-                                        <span>{beneficiaryData.apellido}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Correo:</span>
-                                        <span>{beneficiaryData.email}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Teléfono:</span>
-                                        <span>{beneficiaryData.telefono}</span>
-                                    </div>
-                                </div>
-                            )}
+                        {/* Mostrar los artículos agregados */}
+                        {donationItems.map((item, index) => (
+                            <div key={index} className="flex justify-between items-center space-x-4">
+                                <span>{item.name}</span> <span>{item.quantity}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveDonationItem(index)}
+                                    className="px-4 py-2 bg-red-600 text-white  rounded-md hover:bg-red-700"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        ))}
 
-                            {/* Lista de elementos */}
-                            {items && items.map((item, index) => (
-                                <div key={index} className="flex justify-between items-center">
-                                    <div className="w-24 p-2 border rounded-md">{item.name}</div>
-                                    <div className="w-24 p-2 border rounded-md">{item.quantity}</div>
-                                    <button 
-                                        onClick={() => handleRemoveItemBeneficiarie(index)} 
-                                        className="w-8 h-8 bg-red-500 text-white font-bold rounded-md hover:bg-red-700 flex items-center justify-center text-xl"
-                                        style={{ marginLeft: '10px' }} // Ajustar margen izquierdo
-                                    >
-                                        -
-                                    </button>
-                                </div>
-                            ))}
-
-                            {/* Sección para agregar un nuevo ítem */}
-                            <label className="flex justify-between items-center">
-                                <select onChange={handleChangeBeneficiarie} name="item" className="w-40 p-2 border rounded-md">
-                                    {donations.map(donation => (
-                                        <option key={donation[1]._id} value={donation[1].name}>{donation[1].name}</option>
-                                    ))}
-                                    
-                                </select>
-
-                                {/* Input de cantidad */}
-                                <input 
-                                    name="quantity" 
-                                    value={itemQuantityBeneficiarie} 
-                                    onChange={handleChangeQuantityBeneficiarie} 
-                                    type="number" 
-                                    max="99" 
-                                    min="0" 
-                                    step={selectedItem === "Dinero" ? "0.01" : "1"} // Permitir decimales solo si "Dinero" está seleccionado
-                                    className={`w-24 p-2 border rounded-md ${!validInput ? 'border-red-500' : ''}`} 
-                                    placeholder="Cantidad" 
-                                />
-
-
-                                {!isOtherItem && 
-                                    <button onClick={handleClickItemBeneficiarie} className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950">
-                                        +
-                                    </button>
-                                }
-                            </label>
-
-                        </div>
-                    )}
-
-                    {/* Muestra los campos de entrada cuando la cédula no se encuentra */}
-                    {isCedulaNotFound && (
-                        <div className="mt-4 space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                            className="w-full p-1 border rounded-md"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Apellido"
-                            value={apellido}
-                            onChange={(e) => setApellido(e.target.value)}
-                            className="w-full p-1 border rounded-md"
-                        />
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-1 border rounded-md"
-                        />
-                        <input
-                            type="tel"
-                            placeholder="Teléfono"
-                            value={telefono}
-                            onChange={(e) => setTelefono(e.target.value)}
-                            className="w-full p-1 border rounded-md"
-                        />
-                        <button
-                            onClick={handleCreateBeneficiary}
-                            className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
-                        >
-                            Crear beneficiario
-                        </button>
-                        </div>
-                    )}
-
-                    <div className="flex justify-center mt-4">
-                        {/* Botón Asignar solo visible si la cédula es verificada */}
-                        {isVerified && (
+                        {/* Botón para guardar las donaciones */}
+                        <div className="flex justify-center mt-4">
                             <button
-                                type="submit"
+                                onClick={handleSubmit} // Aquí puedes definir qué hacer con los datos de donaciones
                                 className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
                             >
-                                Asignar
+                                Registrar Donaciones
                             </button>
-                        )}
-
-                    </div>
-                </form>
+                        </div>
+                    </form>
+                </div>
             </div>
-            </div>
-
+    
             {showReport && <Reporte toggleReport={toggleReport} />}
         </div>
     );
+    
 };
 
 export default Donaciones;
