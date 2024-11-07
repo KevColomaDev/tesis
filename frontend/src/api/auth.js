@@ -120,7 +120,6 @@ export const createCampaignRequest = async (data) => {
   }
 }
 
-// ---------------------------------- ESTO ----------------------------------------------------//
 
 export const verifyCedulaRequest = async (cedula) => {
   try {
@@ -129,5 +128,26 @@ export const verifyCedulaRequest = async (cedula) => {
   } catch (error) {
     console.error("Error al verificar la cédula:", error.response || error.message);
     return null; 
+  }
+}
+
+
+export const createBeneficiaryRequest = async (data) => {
+  try {
+    const response = await axios.post(`${donationsAPI}/create-beneficiary`, data, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error("Error al procesar la donación:", error.response ? error.response.data : error.message);
+    return null;
+  }
+};
+
+export const assignItemsToBeneficiaryRequest = async (data) => {
+  try {
+    const response = await axios.post(`${donationsAPI}/assign-items`, data, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error("Error al asignar ítems al beneficiario:", error.response ? error.response.data : error.message);
+    return null;
   }
 };
