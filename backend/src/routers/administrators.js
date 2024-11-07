@@ -26,4 +26,4 @@ router.put('/update-patient-state/:ci', authLogin, updatePatientState)
 
 // Manage Reports
 
-router.get('/reports', authLogin, getReports)
+router.post('/reports', authLogin, getReports)

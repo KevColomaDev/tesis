@@ -74,7 +74,7 @@ export const deleteSocialWorker = async (req, res) => {
     res.status(500).json({ msg: error.message })
   }
 }
-const registerAdministrator = async (req,res) => {
+const registerAdministrator = async (req, res) => {
   // const {
   //   nombre_usuario,
   //   password,
@@ -87,7 +87,7 @@ const registerAdministrator = async (req,res) => {
 
   // const verificarEmail = await Administradores.findOne({email})
   // if(verificarEmail) {return res.status(400).json({msg:"Lo sentimos, el email ya existe"})}
-  
+
   // const admin = new Administradores({
   //     nombre_usuario,
   //     password,
