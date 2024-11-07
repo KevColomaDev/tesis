@@ -62,6 +62,32 @@ export const deleteRoomRequest = async (id) => {
   return response.data
 }
 
+
+
+// Manage Patients
+export const createPatientRequest = async (data) => {
+  const response = await axios.post(`${administratorAPI}/create-patient`, data, { withCredentials: true })
+  return response.data
+}
+
+export const getPatientByCiRequest = async (data) => {
+  const response = await axios.get(`${administratorAPI}/patient/${data}`, { withCredentials: true })
+  console.log(response);
+  return response.data
+}
+
+export const updatePatientStateRequest = async (data, state) => {
+  console.log('CI', data);
+  const response = await axios.put(`${administratorAPI}/update-patient-state/${data}`, state, { withCredentials: true })
+  return response.data
+}
+
+// Manage Reports
+export const getReportsRequest = async (data) => {
+  const response = await axios.get(`${administratorAPI}/reports`, data, { withCredentials: true })
+  return response.data
+}
+
 // Supplies API
 
 export const getAllSuppliesRequest = async () => {

@@ -3,9 +3,11 @@ import { dataRoomRequest, getAllRoomsRequest, createRoomRequest, deleteRoomReque
 import { useState, useEffect } from 'react';
 import { InfoProvider } from '../context/InfoContext';
 import { Description } from '../components/Description';
+import { ReporteHabitaciones } from '../components/ReporteHabitaciones';
 
 const Habitaciones = () => {
   const [rooms, setRooms] = useState([]);
+  const [showReport, setShowReport] = useState(false);
   const addRoom = async () => {
     const newRoomNumber = rooms.length + 1;
     const newRoomData = {
@@ -15,6 +17,9 @@ const Habitaciones = () => {
     setRooms(prevRooms => [...prevRooms, newRoom])
     window.location.reload();
   };
+  const toggleReport = () => {
+    setShowReport(!showReport);
+    };
   
   useEffect(() => {
     const roomData = async () => {
@@ -51,7 +56,12 @@ const Habitaciones = () => {
           >
             Eliminar Habitación
           </button>
+          <button className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-sky-950 transition-colors" onClick={toggleReport}>
+            Generar Reporte
+          </button>
+          {showReport && <ReporteHabitaciones toggleReport={toggleReport} />}
         </div>
+        
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {rooms.map((room, index) => (
