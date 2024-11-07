@@ -1,12 +1,9 @@
 import z from 'zod'
 
 const registerPatientSchema = z.object({
-  habitation: z.string(),
-  name: z.string(),
-  condition: z.string(),
-  food: z.string(),
-  admissionDate: z.string().default(new Date().toLocaleDateString())
-  // departureDate: z.string().optional().default('--/--/--')
+  ci: z.string().min(10).max(10),
+  name: z.string().min(1).max(35),
+  state: z.boolean().default(true)
 })
 
 export const validateRegisterPatient = (data) => {

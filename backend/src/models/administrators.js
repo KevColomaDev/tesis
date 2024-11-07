@@ -4,6 +4,7 @@ export const db = await connectDB()
 const collectionAdmin = db.collection('Administrators')
 const collectionPatients = db.collection('Patients')
 export const collectionRooms = db.collection('Rooms2')
+export const collectionReports = db.collection('RoomsReport')
 
 export const administrators = {
   async login (email, password) {
@@ -12,14 +13,6 @@ export const administrators = {
       return administrator
     } catch (error) {
       console.log(error.message)
-    }
-  },
-  async registerPatient (patient) {
-    try {
-      const newPatient = await collectionPatients.insertOne(patient)
-      return newPatient
-    } catch (error) {
-      console.log(error)
     }
   },
   async registerInRoom (patient) {
@@ -87,6 +80,70 @@ export const manageRooms = {
     try {
       const deletedRoom = await collectionRooms.findOneAndDelete({ h_number: hNumber })
       return deletedRoom
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+// Manage Patients
+export const managePatients = {
+  async createPatient (patient) {
+    try {
+      const newPatient = await collectionPatients.insertOne(patient)
+      return newPatient
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async updatePatientState (ci, state) {
+    try {
+      const updatedPatient = await collectionPatients.findOneAndUpdate({ ci }, { $set: { state } })
+      return updatedPatient
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getPatientByCi (ci) {
+    try {
+      const patient = await collectionPatients.findOne({ ci })
+      return patient
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getPatientState (ci) {
+    try {
+      const patient = await collectionPatients.findOne({ ci })
+      return patient.state
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+// Manage Reports
+export const manageReports = {
+  async createReport (report) {
+    try {
+      const newReport = await collectionReports.insertOne(report)
+      return newReport
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getAllReports () {
+    try {
+      const reportsData = await collectionReports.find({}).toArray()
+      return reportsData
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getReports (initialDate, finalDate) {
+    try {
+      const reportsData = await collectionReports.find({ departureDate: { $gte: initialDate, $lte: finalDate } }).toArray()
+      return reportsData
     } catch (error) {
       console.log(error)
     }

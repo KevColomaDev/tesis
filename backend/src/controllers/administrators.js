@@ -1,8 +1,9 @@
-import { administrators, manageRooms } from '../models/administrators.js'
+import { administrators, manageRooms, managePatients, manageReports } from '../models/administrators.js'
 import { validateLogin } from '../schemas/login.js'
 import { validateRegisterInRoom } from '../schemas/registerInRoom.js'
 import { validateRoom } from '../schemas/rooms.js'
-// import { validateRegisterPatient } from '../schemas/registerPatient.js'
+import { validateRegisterPatient } from '../schemas/registerPatient.js'
+import { validateReport } from '../schemas/roomsReport.js'
 import jwt from 'jsonwebtoken'
 
 export const login = async (req, res) => {
@@ -48,7 +49,6 @@ export const registerInRoom = async (req, res) => {
     if (!patient.h_number || !patient.name) {
       return res.status(401).json({ msg: 'Neccesary name and room' })
     }
-
     const validAdmissionDate = validateDate(patient.admissionDate)
     if (!validAdmissionDate) {
       return res.status(401).json({ msg: 'Invalid admission date' })
@@ -75,20 +75,64 @@ export const setParamsinBlank = async (req, res) => {
   try {
     const hNumber = parseInt(req.params.hNumber)
     const roomData = await administrators.getDataRoom(hNumber)
+
+    // Obtener la fecha y hora actuales
+    const currentDate = new Date()
+    const date = formatDate(currentDate)
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+    // Asignar la fecha y hora al objeto roomData
+    roomData.departureDate = date
+    roomData.departureTime = time
+
     console.log(roomData)
+
+    const reportData = {
+      h_number: roomData.h_number,
+      name: roomData.name,
+      ci: roomData.ci,
+      condition: roomData.condition,
+      food: roomData.food,
+      admissionDate: roomData.admissionDate,
+      admissionTime: roomData.admissionTime,
+      departureDate: roomData.departureDate,
+      departureTime: roomData.departureTime,
+      observations: roomData.observations
+    }
+
+    const report = await manageReports.createReport(reportData)
+    console.log(report)
+
+    await managePatients.updatePatientState(roomData.ci, false)
+
+    // Limpiar los datos del paciente
     roomData.name = '---'
     roomData.ci = '---'
     roomData.condition = '---'
     roomData.food = '---'
     roomData.admissionDate = '--/---/----'
     roomData.departureDate = '--/---/----'
+    roomData.admissionTime = '--:--'
+    roomData.departureTime = '--:--'
+    roomData.observations = ''
+
     const { _id, departureDate, ...others } = roomData
 
     await administrators.setParamsinBlank(roomData)
     return res.status(200).json(others)
   } catch (error) {
     console.log(error)
+    return res.status(500).json({ msg: 'Error processing request' })
   }
+}
+
+// Función para formatear la fecha
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, '0') // Asegura que el día tenga dos dígitos
+  const month = String(date.getMonth() + 1).padStart(2, '0') // Asegura que el mes tenga dos dígitos (los meses son 0-indexados)
+  const year = date.getFullYear()
+
+  return `${day}/${month}/${year}` // Formato DD/MM/YYYY
 }
 
 export const dietData = async (req, res) => {
@@ -145,17 +189,6 @@ export const verifyToken = async (req, res) => {
   }
 }
 
-export const generateReport = async (req, res) => {
-  try {
-    const hNumber = parseInt(req.params.hNumber)
-    const roomData = await administrators.getDataRoom(hNumber)
-    console.log(roomData)
-    return res.status(200).json(roomData)
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 // Manage Rooms
 
 export const createRoom = async (req, res) => {
@@ -186,9 +219,118 @@ export const deleteRoom = async (req, res) => {
 export const getRooms = async (req, res) => {
   try {
     const rooms = await manageRooms.getAllRooms()
-    console.log(rooms.length)
     return res.status(200).json(rooms.length)
   } catch (error) {
     console.log(error)
+  }
+}
+
+// Manage Patients
+
+export const createPatient = async (req, res) => {
+  try {
+    const patient = validateRegisterPatient(req.body)
+    console.log(patient)
+    if (!patient.ci || !patient.name) {
+      return res.status(400).json({ msg: 'Neccesary name and ci' })
+    }
+    const patientExists = await managePatients.getPatientByCi(patient.ci)
+    if (patientExists === null) {
+      await managePatients.createPatient(patient)
+      return res.status(200).json({ msg: 'Patient created' })
+    }
+    if (patientExists) {
+      if (patientExists.state === true) {
+        return res.status(400).json({ msg: 'Patient already admitted' })
+      } else {
+        await managePatients.updatePatientState(patient.ci, true)
+        return res.status(200).json({ msg: 'Patient state updated' })
+      }
+    }
+    await managePatients.createPatient(patient)
+    return res.status(200).json({ msg: 'Patient created' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+export const getPatientByCi = async (req, res) => {
+  try {
+    const ci = req.params.ci
+    const patient = await managePatients.getPatientByCi(ci)
+    if (!patient) {
+      console.log('Patient not found')
+      return res.status(404).json({ msg: 'Patient not found' })
+    }
+    if (patient.state === true) {
+      return res.status(401).json({ msg: 'Patient already admitted' })
+    }
+    const { _id, ...others } = patient
+    return res.status(200).json(others)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const getPatientState = async (req, res) => {
+  try {
+    const ci = req.params.ci
+    const state = await managePatients.getPatientState(ci)
+    console.log(state)
+    return res.status(200).json(state)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const updatePatientState = async (req, res) => {
+  try {
+    const ci = req.params.ci
+    console.log(ci)
+    const state = req.body.state
+    await managePatients.updatePatientState(ci, state)
+    await managePatients.getPatientState(ci)
+    return res.status(200).json({ msg: 'Patient state updated', state })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// Manage Reports
+
+export const createReport = async (req, res) => {
+  try {
+    const report = validateReport(req.body)
+    await manageReports.createReport(report)
+    return res.status(200).json({ msg: 'Report created' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const getReports = async (req, res) => {
+  try {
+    const startDate = req.body.fechaInicial
+    const endDate = req.body.fechaFinal
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Start date and end date are required' })
+    }
+
+    // Convertir las fechas a objetos Date
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    // Formatear las fechas en el formato DD/MM/YYYY
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+
+    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
+
+    const reports = await manageReports.getReports(formattedStartDate, formattedEndDate)
+
+    return res.status(200).json(reports)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Error retrieving reports' })
   }
 }
