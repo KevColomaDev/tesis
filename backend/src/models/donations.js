@@ -17,5 +17,18 @@ export const donations = {
     } catch (error) {
       console.log(error.message)
     }
+  },
+  async updateDonationQuantity(name, quantity) {
+    try {
+      // Actualiza la cantidad de donaciones
+      const result = await collectionDonations.updateOne(
+        { name },
+        { $inc: { quantity: -quantity } }
+      );
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      return error;
+    }
   }
 }

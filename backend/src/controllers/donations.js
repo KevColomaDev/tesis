@@ -137,6 +137,36 @@ export const updateBeneficiary = async (req, res) => {
   }
 };
 
+export const assignDonationItems = async (req, res) => {
+  try {
+    const { donationItemName, quantity } = req.body;
+
+    // Verificar si la donación existe en la base de datos
+    const donation = await collectionDonations.findOne({ name: donationItemName });
+
+    if (!donation) {
+      return res.status(404).json({ msg: 'Artículo de donación no encontrado.' });
+    }
+
+    // Verificar si hay suficiente cantidad
+    if (donation.quantity < quantity) {
+      return res.status(400).json({ msg: 'No hay suficiente cantidad en la donación.' });
+    }
+
+    // Actualizar la cantidad de la donación
+    const result = await donations.updateDonationQuantity(donationItemName, quantity);
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ msg: 'No se pudo actualizar la cantidad de la donación.' });
+    }
+
+    return res.status(200).json({ msg: 'Donación asignada y cantidad actualizada.' });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: 'Internal Server Error' });
+  }
+};
+
 
 
 
