@@ -203,3 +203,19 @@ export const updateBeneficiaryRequest = async (data) => {
   }
 };
 
+export const assignDonationItemsRequest = async (donationItemName, quantity) => {
+  try {
+    const response = await axios.put(
+      `${donationsAPI}/assign-donations`,  // Se utiliza PUT para la asignación
+      { donationItemName, quantity },  // Enviar solo los datos relevantes
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al asignar las donaciones:", error.response ? error.response.data : error.message);
+    return null;
+  }
+};
+
+
+

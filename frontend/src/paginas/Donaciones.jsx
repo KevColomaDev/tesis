@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import Reporte from '../components/Reporte';
-import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest } from '../api/auth';
+import ShowCampaigns from '../components/showCampaigns';
+import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest, assignDonationItemsRequest } from '../api/auth';
 
 
-// Falta corriguir que deje enviar los datos con el @ //
 
 const Donaciones = () => {
     const [items, setItems] = useState([])
@@ -32,24 +32,19 @@ const Donaciones = () => {
 
     const [isCedulaNotFound, setIsCedulaNotFound] = useState(false);
 
-    const [donationItems, setDonationItems] = useState([]);  // Para la lista de donaciones
-const [donationCedula, setDonationCedula] = useState("");  // Para la cédula
-const [donationItemName, setDonationItemName] = useState("");  // Nombre del artículo
-const [donationItemQuantity, setDonationItemQuantity] = useState(0);  // Cantidad del artículo
+    const [donationItems, setDonationItems] = useState([]);   
+    const [donationCedula, setDonationCedula] = useState("");   
+    const [donationItemName, setDonationItemName] = useState("");   
+    const [donationItemQuantity, setDonationItemQuantity] = useState(0); 
  
 
 
-    const handleAddDonationItem = () => {
-        if (donationItemQuantity > 0 && donationItemQuantity < 100) {
-            // Agregar artículo a la lista de donaciones
-            const newDonationItems = [...donationItems, { name: donationItemName, quantity: Number(donationItemQuantity) }];
-            setDonationItems(newDonationItems);
-            setDonationItemQuantity(0);
-            setDonationItemName("");  // Limpiar campo de nombre del artículo
-        } else {
-            alert("Cantidad no válida, debe ser entre 1 y 99.");
-        }
-    };
+      const handleAddDonationItem = () => {
+        setDonationItems([
+          ...donationItems,
+          { name: donationItemName, quantity: donationItemQuantity }
+        ]);
+      };
 
     const handleRemoveDonationItem = (index) => {
         const updatedItems = [...donationItems];
@@ -93,6 +88,11 @@ const [donationItemQuantity, setDonationItemQuantity] = useState(0);  // Cantida
     const handleChangeQuantity = (e) => { setItemQuantity(e.target.value) } 
     const handleChangeNewItemName = (e) =>{ setNewItemName(e.target.value) }
     const handleCamapaignName = e => { setCampaignName(e.target.value) }
+
+    const [showModal, setShowModal] = useState(false);
+
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
 
 
     const handleCedulaSubmit = async () => {
@@ -242,6 +242,24 @@ const handleUpdateBeneficiary = async () => {
         setItems(items)
     },[items])
 
+    
+    const handleRegisterDonations = async () => {
+        const donationData = donationItems.map(item => ({
+          donationItemName: item.name,
+          quantity: item.quantity
+        }));
+    
+        const response = await assignDonationItemsRequest(donationData); // Llamar a la función del archivo auth.js
+    
+        if (response) {
+          alert('Donaciones registradas correctamente');
+          setDonationItems([]); // Limpiar la lista de donaciones después del registro
+        } else {
+          alert('Hubo un error al registrar las donaciones');
+        }
+      };
+
+
     return (
         <div className="p-4 md:p-8 bg-gray-100 min-h-screen flex flex-col items-center">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -252,16 +270,23 @@ const handleUpdateBeneficiary = async () => {
                     </div>
                 ))}
             </div>
-            <button
-                className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md mb-8 hover:bg-sky-950 transition-colors"
-                onClick={toggleReport}
-            >
-                Generar Reporte
-            </button>
+            <div className="flex space-x-4">
+                <button className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md mb-8 hover:bg-sky-950 transition-colors"
+                    onClick={handleOpenModal}
+                >
+                    Campañas registradas</button>
+                
+                <button
+                    className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md mb-8 hover:bg-sky-950 transition-colors"
+                    onClick={toggleReport}
+                >
+                    Generar Reporte
+                </button>
+            </div>
     
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center"> {/* Ajuste a 3 columnas en pantallas grandes */}
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
-                    <h3 className="text-lg font-semibold mb-4 text-center">Campaña</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-center">Agregar campaña</h3>
                     <div className="space-y-4 w-full">
                         <label className="flex justify-between items-center">
                             <input onChange={handleCamapaignName} value={campaignName} type="text" placeholder="Nombre de la Campaña" className="w-full ml-1 p-1 border rounded-md" />
@@ -506,7 +531,7 @@ const handleUpdateBeneficiary = async () => {
                         {/* Botón para guardar las donaciones */}
                         <div className="flex justify-center mt-4">
                             <button
-                                onClick={handleSubmit} // Aquí puedes definir qué hacer con los datos de donaciones
+                                onClick={handleRegisterDonations} // Aquí puedes definir qué hacer con los datos de donaciones
                                 className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
                             >
                                 Registrar Donaciones
@@ -517,6 +542,7 @@ const handleUpdateBeneficiary = async () => {
             </div>
     
             {showReport && <Reporte toggleReport={toggleReport} />}
+            {showModal && <ShowCampaigns onClose={handleCloseModal} />}
         </div>
     );
     
