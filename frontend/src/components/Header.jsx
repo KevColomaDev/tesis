@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import user from '../assets/user.png';
+import { logoutRequest } from '../api/auth';
 
 export default function Header() {
   const location = useLocation();
@@ -27,6 +28,10 @@ export default function Header() {
     }
   };
 
+  const logoutClick = async () =>{
+    const response = await logoutRequest();
+    console.log(response)
+  }
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -138,11 +143,22 @@ export default function Header() {
                       Opciones del administrador
                     </Link>
                     <Link
+                      onClick={()=> setIsMenuOpen(false)}
+                      to="/actualizar-password"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
+                      role="menuitem"
+                      tabIndex="-1"
+                      id="user-menu-item-2"
+                    >
+                      Actualizar Contraseña
+                    </Link>
+                    <Link
                       to="/login"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
                       role="menuitem"
                       tabIndex="-1"
                       id="user-menu-item-2"
+                      onClick={()=>logoutClick()}
                     >
                       Salir
                     </Link>
@@ -230,11 +246,23 @@ export default function Header() {
                   <div className="mt-1 text-sm font-medium leading-none text-gray-400">email@example.com</div>
                 </div>
               </div>
-              <div className="mt-3 space-y-1">
+              <div className="mt-3 space-y-1" onClick={closeMobileMenu}>
+                <Link
+                  to="/actualizar-password"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Cambiar Contraseña
+                </Link>
+                <Link
+                  to="/admin"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Opciones del administrador
+                </Link>
                 <Link
                   to="/login"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                  onClick={closeMobileMenu} // Close mobile menu on link click
+                  onClick={()=>logoutClick()}
                 >
                   Salir
                 </Link>

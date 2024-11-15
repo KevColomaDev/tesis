@@ -1,6 +1,7 @@
 import axios from "axios"
 
 const administratorAPI = 'http://localhost:4321/administrators'
+const socialWorkersAPI = 'http://localhost:4321/social-workers'
 const suppliesAPI = 'http://localhost:4321/supplies'
 const donationsAPI = 'http://localhost:4321/donations'
 // const administratorAPI = 'https://examen-full-stack-backend.onrender.com/administrators'
@@ -34,6 +35,15 @@ export const deleteSocialWorkerRequest = async (id) => {
     return error.response ? error.response.data : { msg: 'Something went wrong' };
   }
   
+}
+
+export const updatePasswordRequest = async (data) => {
+  try {
+    const response = await axios.post(`${socialWorkersAPI}/update-password`, data, { withCredentials: true })
+    return response;
+  } catch (error) {
+    return error.response ? error.response.data : { msg: 'Something went wrong' };
+  }
 }
 
 export const dietDataRequest = async () => {
@@ -113,6 +123,26 @@ export const getReportsRequest = async (data) => {
   return response.data 
 }
 
+export const getSuppliesReportsRequest = async (data) => {
+  const response = await axios.post(`${suppliesAPI}/reports`, data, { withCredentials: true })
+  return response.data 
+}
+
+export const getSuppliesRoomReportsRequest = async (data) => {
+  const response = await axios.post(`${suppliesAPI}/rooms-reports`, data, { withCredentials: true })
+  return response.data 
+}
+
+export const getDonationsReportsRequest = async (data) => {
+  const response = await axios.post(`${donationsAPI}/reports`, data, { withCredentials: true })
+  return response.data 
+}
+
+export const getCampaignsReportsRequest = async (data) => {
+  const response = await axios.post(`${donationsAPI}/campaigns-reports`, data, { withCredentials: true })
+  return response.data 
+}
+
 // Supplies API
 
 export const getAllSuppliesRequest = async () => {
@@ -171,7 +201,6 @@ export const createCampaignRequest = async (data) => {
   }
 }
 
-
 export const verifyCedulaRequest = async (cedula) => {
   try {
     const response = await axios.post(`${donationsAPI}/verify`, { cedula },  { withCredentials: true }  );
@@ -181,7 +210,6 @@ export const verifyCedulaRequest = async (cedula) => {
     return null; 
   }
 }
-
 
 export const createBeneficiaryRequest = async (data) => {
   try {
@@ -203,19 +231,13 @@ export const updateBeneficiaryRequest = async (data) => {
   }
 };
 
-export const assignDonationItemsRequest = async (donationItemName, quantity) => {
+export const assignDonationsRequest = async (data) => {
   try {
-    const response = await axios.put(
-      `${donationsAPI}/assign-donations`,  // Se utiliza PUT para la asignación
-      { donationItemName, quantity },  // Enviar solo los datos relevantes
-      { withCredentials: true }
-    );
+    const response = await axios.put(`${donationsAPI}/assign-donations`, data, { withCredentials: true });
     return response.data;
   } catch (error) {
-    console.error("Error al asignar las donaciones:", error.response ? error.response.data : error.message);
+    console.error("Error al actualizar el beneficiario:", error.response ? error.response.data : error.message);
     return null;
   }
 };
-
-
 

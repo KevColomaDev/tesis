@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { deleteSocialWorkerRequest, getSocialWorkersRequest } from "../api/auth";
 const UsersTable = () => {
   const [socialWorkers, setSocialWorkers] = useState([]);
-  const [admins, setAdmins] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,7 +54,7 @@ const UsersTable = () => {
 
   useEffect(()=>{
     if (!openAlert){
-        setCurrentDelete({id:'',type:''})
+        setCurrentDelete({id:''})
     }
   },[openAlert])
   return (
@@ -76,15 +75,12 @@ const UsersTable = () => {
                   </div>
                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                     <DialogTitle as="h3" className="text-base font-bold mb-5 leading-6 text-gray-900">
-                        {currentDelete.type === 'admin' ? 'Eliminar Administrador' : 'Eliminar Asistente Social'}
+                        {'Eliminar Asistente Social'}
                     </DialogTitle>
                     <div className="mt-2">
                       <form className="w-full">
                         <div className="">
-                            {currentDelete.type === 'admin' ? 
-                            '¿Estás seguro de eliminar este administrador? Esta acción no se puede deshacer.':
-                            '¿Estás seguro de eliminar este asistente social? Esta acción no se puede deshacer.'
-                            }
+                            {'¿Estás seguro de eliminar este asistente social? Esta acción no se puede deshacer.'}
                         </div>
                       </form>
                     </div>
@@ -94,7 +90,7 @@ const UsersTable = () => {
             <div className="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                 <button
                 type="button"
-                onClick={()=>handleDelete(currentDelete.id, currentDelete.type)}
+                onClick={()=>handleDelete(currentDelete.id)}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:hover:cursor-not-allowed"
                 >
                 Eliminar
@@ -244,71 +240,6 @@ const UsersTable = () => {
                       colSpan={5}
                     >
                       {loading ? "Cargando asistentes sociales..." : "No existen asistentes sociales registrados"}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="flex flex-col items-center overflow-x-auto md:max-h-[35vh]">
-          <span className="font-bold text-sm mb-2">ADMINISTRADORES</span>
-          <div className="inline-block w-[90vw] overflow-x-auto">
-            <table className="min-w-full  text-sm font-light">
-              <thead
-                className={`border-b border-neutral-200 font-medium bg-slate-100 sticky top-0`}
-                >
-                <tr>
-                  <th className="px-6 py-2 sticky top-0">Nombre</th>
-                  <th className="px-6 py-2 sticky top-0">Email</th>
-                  <th className="px-6 py-2 sticky top-0">Email Confirmado</th>
-                  <th className="px-6 py-2 sticky top-0">Opciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y text-center">
-                {admins.length > 0 ? (
-                  admins.map((admin) => (
-                    <tr
-                    className="border-b border-neutral-20 hover:bg-gray-300"
-                    key={admin._id}
-                    >
-                      <td className="whitespace-nowrap px-6 py-4">
-                        {admin.nombre_usuario}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        {admin.email}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        {admin.confirmarEmail ? "Confirmado" : "No Confirmado"}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4  ">
-                        <span
-                        onClick={() => {setOpenAlert(true); setCurrentDelete({id:admin._id,type:'admin'})}} 
-                        className="flex items-center justify-center text-red-700 font-bold hover:cursor-pointer transition-transform hover:scale-110 ease-in-out">
-                          Eliminar
-                          <svg
-                            width="30"
-                            height="30"
-                            viewBox="0 0 48 48"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            >
-                            <path
-                              d="M14 42C12.9 42 11.9587 41.6087 11.176 40.826C10.3933 40.0433 10.0013 39.1013 10 38V12H8V8H18V6H30V8H40V12H38V38C38 39.1 37.6087 40.042 36.826 40.826C36.0433 41.61 35.1013 42.0013 34 42H14ZM34 12H14V38H34V12ZM18 34H22V16H18V34ZM26 34H30V16H26V34Z"
-                              fill="#D22F27"
-                              />
-                          </svg>
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      className="text-xl text-slate-500 font-bold p-4"
-                      colSpan={4}
-                      >
-                      {loading ? "Cargando administradores..." : "No existen administradores registrados"}
                     </td>
                   </tr>
                 )}

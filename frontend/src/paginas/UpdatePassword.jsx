@@ -1,33 +1,31 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { registerSocialWorkerRequest } from "../api/auth";
+import { registerSocialWorkerRequest, updatePasswordRequest } from "../api/auth";
 const CreateUser = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [formUser, setFormUser] = useState({
-    ci: null,
-    name: "",
-    lastname: "",
-    email: "",
+  const [formUpdatePassword, setFormUpdatePassword] = useState({
+    password: "",
+    newPassword: "",
+    confirmNewPassword: ""
   });
 
-  const handleChangeUser = (e) => {
-    setFormUser({ ...formUser, [e.target.name]: e.target.value });
+  const handleChangeUpdatePassword = (e) => {
+    setFormUpdatePassword({ ...formUpdatePassword, [e.target.name]: e.target.value });
   };
 
-  const handleRegisterUser = async () => {
+  const handleRegisterUpdatePassword = async () => {
     try {
       setLoading(true);
-      const response = await registerSocialWorkerRequest(formUser)
+      const response = await updatePasswordRequest(formUpdatePassword)
       console.log(response)
       if (response.status === 200) {
         setSuccess(response.data.msg);
-        setFormUser({
-          ci: 0,
-          name: "",
-          lastname: "",
-          email: "",
+        setFormUpdatePassword({
+          password: "",
+          newPassword: "",
+          confirmNewPassword: ""
         });
         setTimeout(() => {
           setSuccess("");
@@ -91,7 +89,7 @@ const CreateUser = () => {
         </div>
       )}
       <Link
-        to="/admin"
+        to="/habitaciones"
         className="inline-flex items-center border border-blue-900 px-3 py-1.5 m-8 rounded-md text-blue-900 hover:bg-blue-50"
       >
         <svg
@@ -113,77 +111,59 @@ const CreateUser = () => {
       <form className="max-w-sm mx-auto px-4 sm:px-0">
         <div className={`mb-5`}>
           <label
-            htmlFor="ci"
+            htmlFor="password"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            CI
+            Contraseña Actual
           </label>
           <input
-            type="number"
-            name="ci"
-            min={0}
-            value={formUser.ci}
-            onChange={handleChangeUser}
+            type="password"
+            name="password"
+            value={formUpdatePassword.password}
+            onChange={handleChangeUpdatePassword}
             className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             required
           />
         </div>
         <div className={`mb-5`}>
           <label
-            htmlFor="nombre"
+            htmlFor="newPassword"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Nombre
+            Nueva Contraseña
           </label>
           <input
-            type="text"
-            name="name"
-            value={formUser.name}
-            onChange={handleChangeUser}
+            type="password"
+            name="newPassword"
+            value={formUpdatePassword.newPassword}
+            onChange={handleChangeUpdatePassword}
             className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             required
           />
         </div>
         <div className={`mb-5`}>
           <label
-            htmlFor="lastname"
+            htmlFor="confirmNewPassword"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Apellido
+            Repite la nueva contraseña
           </label>
           <input
-            type="text"
-            name="lastname"
-            value={formUser.lastname}
-            onChange={handleChangeUser}
+            type="password"
+            name="confirmNewPassword"
+            value={formUpdatePassword.confirmNewPassword}
+            onChange={handleChangeUpdatePassword}
             className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            required
-          />
-        </div>
-        <div className="mb-5">
-          <label
-            htmlFor="email"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formUser.email}
-            onChange={handleChangeUser}
-            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="tucorreo@email.com"
             required
           />
         </div>
         <button
           type="button"
-          onClick={() => handleRegisterUser()}
+          onClick={() => handleRegisterUpdatePassword()}
           className={`w-full bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md mb-8 hover:bg-sky-950 transition-colors disabled:cursor-not-allowed disabled:bg-blue-800 disabled:hover:bg-blue-800}`}
           disabled={loading}
         >
-          {loading ? "Registrando..." : "Registrar Asistente Social"}
+          {loading ? "Actualizando..." : "Actualizar Contraseña"}
         </button>
       </form>
     </>

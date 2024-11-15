@@ -13,6 +13,7 @@ import AdminOptions from "./paginas/AdminOptions";
 import { SessionProvider } from "./context/SessionContext";
 import CreateUser from "./paginas/CreateUser";
 import UsersTable from "./paginas/UsersTable";
+import UpdatePassword from "./paginas/UpdatePassword";
 
 const App = () => {
   return (
@@ -52,7 +53,15 @@ const App = () => {
               </>
             }
           />
-
+          <Route
+            path="/actualizar-password"
+            element={
+              <>
+                <Header />
+                <UpdatePassword />
+              </>
+            }
+          />
           <Route
             path="/admin"
             element={
