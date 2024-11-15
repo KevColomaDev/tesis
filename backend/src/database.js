@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import { config } from 'dotenv'
 config()
 
-const URI = process.env.MONGO_URI_LOCAL
+const URI = process.env.MONGO_URI_ATLAS
 
 export const connectDB = async () => {
   try {

@@ -148,6 +148,16 @@ export const registerInRoom = async (req, res) => {
     if (!validAdmissionDate) {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
+    const currentDate = new Date()
+    const currentAdmissionDate = currentDate.toLocaleDateString()
+    console.log(currentAdmissionDate)
+    const currentTime = currentDate.toLocaleTimeString()
+    console.log(currentTime)
+    console.log(typeof (currentAdmissionDate), typeof (patient.admissionDate))
+    console.log(`${patient.admissionDate}`)
+    if (currentAdmissionDate !== patient.admissionDate) {
+      return res.status(401).json({ msg: 'Invalid admission date' })
+    }
     await administrators.registerInRoom(patient)
     return res.status(200).json({ msg: 'Patient registered' })
   } catch (error) {
@@ -330,6 +340,8 @@ export const createPatient = async (req, res) => {
       return res.status(400).json({ msg: 'Neccesary name and ci' })
     }
     const patientExists = await managePatients.getPatientByCi(patient.ci)
+    console.log('El paciente existe?')
+    console.log(patientExists)
     if (patientExists === null) {
       await managePatients.createPatient(patient)
       return res.status(200).json({ msg: 'Patient created' })
