@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Reporte from "../components/Reporte";
+import { ReporteSuministros } from "../components/ReporteSuministros";
 import {
   addStockRequest,
   assignSuppliesRequest,
@@ -210,7 +210,7 @@ const Suministros = () => {
         </div>
       </div>
 
-      {showReport && <Reporte toggleReport={toggleReport} />}
+      {showReport && <ReporteSuministros toggleReport={toggleReport} />}
       {showSupplyForm && <SupplyForm toggleSupplyForm={toggleSupplyForm} />}
     </div>
   );

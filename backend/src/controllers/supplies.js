@@ -3,7 +3,7 @@ import { validateSupply } from '../schemas/createSupply.js'
 import { validateAddSupplies } from '../schemas/addSupplies.js'
 import mongoose from 'mongoose'
 import { validateAssignSupplies } from '../schemas/assignSupplies.js'
-import { collectionReportsSupplies } from '../models/reportsSupplies.js'
+import { collectionReportsRoomSupplies, collectionReportsSupplies, reportsSupplies } from '../models/reportsSupplies.js'
 import { socialWorkers } from '../models/socialWorkers.js'
 import { sendSupplyShortageNotification } from '../config/nodemailer.js'
 
@@ -79,6 +79,23 @@ export const addStock = async (req, res) => {
     if (!updateSupplies) {
       return res.status(404).json({ msg: 'Supply not found' })
     }
+    const todayDate = new Date().toLocaleDateString()
+    const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, todayDate)
+    if (reports) {
+      const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
+        { name: nameInput, date: todayDate },
+        { $set: { quantity: reports.quantity + suppliesInput.quantity } },
+        { returnDocument: 'after' }
+      )
+      console.log(updatedReport)
+    } else {
+      const newReport = {
+        name: nameInput,
+        quantity: suppliesInput.quantity,
+        date: new Date().toLocaleDateString()
+      }
+      await collectionReportsSupplies.insertOne(newReport)
+    }
     return res.status(200).json({ msg: 'Supplies registered', updateSupplies })
   } catch (error) {
     console.error(error)
@@ -92,6 +109,9 @@ export const assignSupplies = async (req, res) => {
     const assignInput = validateAssignSupplies(req.body)
     if (Object.keys(assignInput).includes('issues')) {
       return res.status(400).json({ errors: assignInput.issues })
+    }
+    if (assignInput.supplies.length < 1) {
+      return res.status(400).json({ msg: 'Supplies not found.' })
     }
     const updatedSupplies = []
     // Check if existences exists
@@ -122,10 +142,64 @@ export const assignSupplies = async (req, res) => {
       assignedSupplies: assignInput.supplies,
       assignDate: new Date().toLocaleDateString()
     }
-    await collectionReportsSupplies.insertOne(report)
+    await collectionReportsRoomSupplies.insertOne(report)
     return res.status(200).json(report)
   } catch (error) {
     console.log(error)
+  }
+}
+export const getReports = async (req, res) => {
+  try {
+    const startDate = req.body.fechaInicial
+    const endDate = req.body.fechaFinal
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Start date and end date are required' })
+    }
+
+    // Convertir las fechas a objetos Date
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    // Formatear las fechas en el formato DD/MM/YYYY
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+
+    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
+
+    const reports = await reportsSupplies.getReports(formattedStartDate, formattedEndDate)
+
+    return res.status(200).json(reports)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Error retrieving reports' })
+  }
+}
+export const getRoomsReports = async (req, res) => {
+  try {
+    const startDate = req.body.fechaInicial
+    const endDate = req.body.fechaFinal
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Start date and end date are required' })
+    }
+
+    // Convertir las fechas a objetos Date
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    // Formatear las fechas en el formato DD/MM/YYYY
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+
+    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
+
+    const reports = await reportsSupplies.getRoomsReports(formattedStartDate, formattedEndDate)
+
+    return res.status(200).json(reports)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Error retrieving reports' })
   }
 }
 

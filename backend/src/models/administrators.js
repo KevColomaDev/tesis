@@ -1,4 +1,5 @@
 import { connectDB } from '../database.js'
+import bcrypt from 'bcrypt'
 
 export const db = await connectDB()
 const collectionAdmin = db.collection('Administrators')
@@ -9,8 +10,13 @@ export const collectionReports = db.collection('RoomsReport')
 export const administrators = {
   async login (email, password) {
     try {
-      const administrator = await collectionAdmin.findOne({ email, password })
-      return administrator
+      const response = await this.matchPassword(password, email)
+      if (response) {
+        const administrator = await collectionAdmin.findOne({ email })
+        return administrator
+      } else {
+        return response
+      }
     } catch (error) {
       console.log(error.message)
     }
@@ -54,6 +60,11 @@ export const administrators = {
     } catch (error) {
       console.log(error)
     }
+  },
+  async matchPassword (password, email) {
+    const { password: UserPassword } = await collectionAdmin.findOne({ email })
+    const response = await bcrypt.compare(password, UserPassword)
+    return response
   }
 }
 
