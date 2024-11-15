@@ -17,20 +17,36 @@ export const login = async (req, res) => {
       return res.status(401).json({ msg: 'Neccesary email and password' })
     }
     const administratorLogin = await administrators.login(administrator.email, administrator.password)
+    let socialWorkersLogin = {}
     if (!administratorLogin) {
-      return res.status(401).json({ msg: 'Wrong email or password' })
-    }
-    const token = jwt.sign({ administratorLogin }, process.env.JWT_SECRET)
-    console.log(token)
-    res.cookie('token', token, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      partitioned: true
-    })
+      socialWorkersLogin = await socialWorkers.login(administrator.email, administrator.password)
+      if (!socialWorkersLogin) {
+        return res.status(401).json({ msg: 'Wrong email or password' })
+      }
+      const token = jwt.sign({ socialWorkersLogin }, process.env.JWT_SECRET)
+      console.log(token)
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        partitioned: true
+      })
 
-    const { _id, password, ...others } = administratorLogin
-    return res.status(200).json({ administratorLogin: others })
+      const { _id, password, ...others } = socialWorkersLogin
+      return res.status(200).json({ socialWorkersLogin: others })
+    } else {
+      const token = jwt.sign({ administratorLogin }, process.env.JWT_SECRET)
+      console.log(token)
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        partitioned: true
+      })
+
+      const { _id, password, ...others } = administratorLogin
+      return res.status(200).json({ administratorLogin: others })
+    }
   } catch (error) {
     console.log(error)
   }
@@ -74,33 +90,7 @@ export const deleteSocialWorker = async (req, res) => {
     res.status(500).json({ msg: error.message })
   }
 }
-const registerAdministrator = async (req, res) => {
-  // const {
-  //   nombre_usuario,
-  //   password,
-  //   email
-  // } = req.body
 
-  // if (Object.values(req.body).includes('')) { return res.status(400).json({ msg: 'Lo sentimos, debes llenar todos los campos' }) }
-  // const verificarNombreUsuario = await Administradores.findOne({nombre_usuario})
-  // if(verificarNombreUsuario) {return res.status(400).json({msg:"Lo sentimos, el nombre de usuario ya existe"})}
-
-  // const verificarEmail = await Administradores.findOne({email})
-  // if(verificarEmail) {return res.status(400).json({msg:"Lo sentimos, el email ya existe"})}
-
-  // const admin = new Administradores({
-  //     nombre_usuario,
-  //     password,
-  //     email
-  // })
-
-  // admin.password = await admin.encrypPassword(password)
-  // const token = admin.crearToken()
-  // await admin.save()
-  // sendMailToAdmin(email,token)
-
-  // res.status(200).json({res:'Registro exitoso, se ha enviado un correo electrónico al administrador.'})
-}
 /*
 export const registerPatient = async (req, res) => {
   const validateDate = (date) => {
@@ -135,6 +125,7 @@ export const registerPatient = async (req, res) => {
   }
 }
 */
+
 export const registerInRoom = async (req, res) => {
   const validateDate = (date) => {
     let regex = /^\d{1}\/\d{1}\/\d{4}$/

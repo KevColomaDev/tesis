@@ -5,6 +5,8 @@ import { authLogin } from '../middlewares/authLogin.js'
 export const router = Router()
 
 router.post('/login', login)
+router.post('/new-social-worker', authLogin, registerSocialWorker)
+router.delete('/social-worker/:id', authLogin, deleteSocialWorker)
 router.get('/test', authLogin, (req, res) => res.send('test'))
 // router.post('/register-patient', authLogin, registerPatient)
 router.post('/register-in-room', authLogin, registerInRoom)

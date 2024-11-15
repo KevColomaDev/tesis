@@ -1,9 +1,10 @@
 import e from 'express'
 import { router } from './routers/administrators.js'
 import { routerSupplies } from './routers/supplies.js'
+import { routerDonations } from './routers/donations.js'
+import { routerSocialWorkers } from './routers/socialWorkers.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { routerDonations } from './routers/donations.js'
 
 export const app = e()
 
@@ -34,3 +35,4 @@ app.use(e.json())
 app.use('/administrators', router)
 app.use('/supplies', routerSupplies)
 app.use('/donations', routerDonations)
+app.use('/social-workers', routerSocialWorkers)
