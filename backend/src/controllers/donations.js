@@ -1,8 +1,9 @@
-import { collectionCampaigns } from '../models/campaigns.js'
+import { campaigns, collectionCampaigns } from '../models/campaigns.js'
 import { donations, collectionDonations } from '../models/donations.js'
 import { validateCampaign } from '../schemas/createCampaign.js'
-import { beneficiaries } from '../models/beneficiaries.js';
-import { reportDonations } from '../models/reportsDonations.js';
+import { beneficiaries } from '../models/beneficiaries.js'
+import { collectionReportDonations, reportDonations } from '../models/reportsDonations.js'
+import { validateAssignDonations } from '../schemas/assignDonations.js'
 
 export const getCampaigns = async (req, res) => {
   try {
@@ -56,17 +57,15 @@ export const createCampaign = async (req, res) => {
   }
 }
 
-
-
 export const verifyCedula = async (req, res) => {
   const { cedula } = req.body
 
   if (!cedula || typeof cedula !== 'string' || cedula.trim().length === 0) {
-    return res.status(400).json({ msg: 'La cédula es obligatoria y debe ser válida' });
+    return res.status(400).json({ msg: 'La cédula es obligatoria y debe ser válida' })
   }
 
   try {
-    const beneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+    const beneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula)
 
     if (beneficiary) {
       return res.status(200).json({
@@ -77,48 +76,48 @@ export const verifyCedula = async (req, res) => {
           email: beneficiary.email,
           telefono: beneficiary.telefono
         }
-      });
+      })
     } else {
-      return res.status(404).json({ found: false, msg: 'Beneficiario no encontrado' });
+      return res.status(404).json({ found: false, msg: 'Beneficiario no encontrado' })
     }
   } catch (error) {
-    console.error('Error interno del servidor:', error);  
-    return res.status(500).json({ msg: 'Error interno del servidor', error: error.message });
+    console.error('Error interno del servidor:', error)
+    return res.status(500).json({ msg: 'Error interno del servidor', error: error.message })
   }
-};
+}
 
 export const createBeneficiary = async (req, res) => {
-  const { cedula, nombre, apellido, email, telefono } = req.body;
+  const { cedula, nombre, apellido, email, telefono } = req.body
 
   if (!cedula || !nombre || !apellido || !email || !telefono) {
-    return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
+    return res.status(400).json({ msg: 'Todos los campos son obligatorios' })
   }
 
   try {
-    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula)
     if (existingBeneficiary) {
-      return res.status(400).json({ msg: 'El beneficiario ya existe' });
+      return res.status(400).json({ msg: 'El beneficiario ya existe' })
     }
 
-    const newBeneficiary = await beneficiaries.createBeneficiary({ cedula, nombre, apellido, email, telefono });
-    return res.status(201).json({ msg: 'Beneficiario creado exitosamente', beneficiary: newBeneficiary });
+    const newBeneficiary = await beneficiaries.createBeneficiary({ cedula, nombre, apellido, email, telefono })
+    return res.status(201).json({ msg: 'Beneficiario creado exitosamente', beneficiary: newBeneficiary })
   } catch (error) {
-    console.error('Error al crear el beneficiario:', error);
-    return res.status(500).json({ msg: 'Error al crear el beneficiario', error: error.message });
+    console.error('Error al crear el beneficiario:', error)
+    return res.status(500).json({ msg: 'Error al crear el beneficiario', error: error.message })
   }
 }
 
 export const updateBeneficiary = async (req, res) => {
-  const { cedula, nombre, apellido, email, telefono } = req.body;
+  const { cedula, nombre, apellido, email, telefono } = req.body
 
   if (!cedula) {
-    return res.status(400).json({ msg: 'La cédula es obligatoria' });
+    return res.status(400).json({ msg: 'La cédula es obligatoria' })
   }
 
   try {
-    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula);
+    const existingBeneficiary = await beneficiaries.verifyBeneficiaryByCedula(cedula)
     if (!existingBeneficiary) {
-      return res.status(404).json({ msg: 'Beneficiario no encontrado' });
+      return res.status(404).json({ msg: 'Beneficiario no encontrado' })
     }
 
     const updatedData = {
@@ -126,72 +125,115 @@ export const updateBeneficiary = async (req, res) => {
       ...(apellido && { apellido }),
       ...(email && { email }),
       ...(telefono && { telefono })
-    };
+    }
 
-    await beneficiaries.updateBeneficiaryByCedula(cedula, updatedData);
+    await beneficiaries.updateBeneficiaryByCedula(cedula, updatedData)
 
-    return res.status(200).json({ msg: 'Beneficiario actualizado exitosamente', updatedData });
+    return res.status(200).json({ msg: 'Beneficiario actualizado exitosamente', updatedData })
   } catch (error) {
-    console.error('Error al actualizar el beneficiario:', error);
-    return res.status(500).json({ msg: 'Error al actualizar el beneficiario', error: error.message });
+    console.error('Error al actualizar el beneficiario:', error)
+    return res.status(500).json({ msg: 'Error al actualizar el beneficiario', error: error.message })
   }
 };
 
-export const assignDonationItems = async (req, res) => {
+export const assignBeneficiary = async (req, res) => {
   try {
-    const { donationItemName, quantity } = req.body;
-
-    // Verificar si la donación existe en la base de datos
-    const donation = await collectionDonations.findOne({ name: donationItemName });
-
-    if (!donation) {
-      return res.status(404).json({ msg: 'Artículo de donación no encontrado.' });
+    const donationsInput = validateAssignDonations(req.body)
+    if (Object.keys(donationsInput).includes('issues')) {
+      return res.status(400).json({ errors: donationsInput.issues })
     }
-
-    // Verificar si hay suficiente cantidad
-    if (donation.quantity < quantity) {
-      return res.status(400).json({ msg: 'No hay suficiente cantidad en la donación.' });
+    const beneficiary = await beneficiaries.verifyBeneficiaryByCedula(donationsInput.ci)
+    if (!beneficiary) {
+      return res.status(400).json({ msg: 'Beneficiary does not exist' })
     }
-
-    // Actualizar la cantidad de la donación
-    const result = await donations.updateDonationQuantity(donationItemName, quantity);
-
-    if (result.modifiedCount === 0) {
-      return res.status(400).json({ msg: 'No se pudo actualizar la cantidad de la donación.' });
+    const updatedDonations = []
+    if (donationsInput.items.length < 1) {
+      return res.status(400).json({ msg: 'No items found' })
     }
-
-    return res.status(200).json({ msg: 'Donación asignada y cantidad actualizada.' });
+    // Check if existences exists
+    for (let i = 0; i < donationsInput.items.length; i++) {
+      try {
+        const { quantity } = await collectionDonations.findOne({ name: donationsInput.items[i].name })
+        if (quantity < donationsInput.items[i].quantity) {
+          return res.status(400).json({ msg: 'Not enough existencies.' })
+        } else {
+          const updatedDonation = await collectionDonations.findOneAndUpdate(
+            { name: donationsInput.items[i].name },
+            { $set: { quantity: quantity - donationsInput.items[i].quantity } },
+            { returnDocument: 'after' })
+          updatedDonations.push(updatedDonation)
+        }
+      } catch (error) {
+        console.log(error)
+        return res.status(400).json({ msg: 'Donation(s) do(es) not exists.' })
+      }
+    }
+    // Make report
+    const report = {
+      ci: donationsInput.ci,
+      name: beneficiary.nombre,
+      lastname: beneficiary.apellido,
+      assignedDonations: donationsInput.items,
+      assignDate: new Date().toLocaleDateString()
+    }
+    await collectionReportDonations.insertOne(report)
+    return res.status(200).json(report)
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ msg: 'Internal Server Error' });
+    console.log(error)
   }
-};
+}
+export const getReports = async (req, res) => {
+  try {
+    const startDate = req.body.fechaInicial
+    const endDate = req.body.fechaFinal
 
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Start date and end date are required' })
+    }
 
+    // Convertir las fechas a objetos Date
+    const start = new Date(startDate)
+    const end = new Date(endDate)
 
+    // Formatear las fechas en el formato DD/MM/YYYY
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
 
-/// -------------------------------------Borrar esto si no funciona-------------------------------------
+    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
 
+    const reports = await reportDonations.getReports(formattedStartDate, formattedEndDate)
 
+    return res.status(200).json(reports)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Error retrieving reports' })
+  }
+}
 
-//export const assignBeneficiary = async (req, res) => {
-  // try {
-  //   const suppliesInput = validateAddSupplies(req.body)
-  //   console.log(suppliesInput)
-  //   const oldSupplies = await collectionSuplies.findOne({ name: suppliesInput.name })
-  //   if (oldSupplies.toothPaste < suppliesInput.toothPaste || oldSupplies.soap < suppliesInput.soap || oldSupplies.toothBrush < suppliesInput.toothBrush || oldSupplies.towel < suppliesInput.towel) {
-  //     return res.status(401).json({ msg: 'Not enough supplies' })
-  //   }
+export const getCampaignsReports = async (req, res) => {
+  try {
+    const startDate = req.body.fechaInicial
+    const endDate = req.body.fechaFinal
 
-  //   const newSupplies = {
-  //     toothPaste: oldSupplies.toothPaste - suppliesInput.toothPaste,
-  //     soap: oldSupplies.soap - suppliesInput.soap,
-  //     toothBrush: oldSupplies.toothBrush - suppliesInput.toothBrush,
-  //     towel: oldSupplies.towel - suppliesInput.towel
-  //   }
-  //   await supplies.registerSupplies(newSupplies)
-  //   return res.status(200).json({ msg: 'Supplies assigned', newSupplies })
-  // } catch (error) {
-  //   console.log(error)
-  // }
-//}
+    if (!startDate || !endDate) {
+      return res.status(400).json({ msg: 'Start date and end date are required' })
+    }
+
+    // Convertir las fechas a objetos Date
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    // Formatear las fechas en el formato DD/MM/YYYY
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+
+    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
+
+    const reports = await campaigns.getReports(formattedStartDate, formattedEndDate)
+
+    return res.status(200).json(reports)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: 'Error retrieving reports' })
+  }
+}

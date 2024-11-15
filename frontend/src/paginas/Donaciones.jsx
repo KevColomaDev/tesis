@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import Reporte from '../components/Reporte';
 import ShowCampaigns from '../components/showCampaigns';
-import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest, assignDonationItemsRequest } from '../api/auth';
+import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest, assignDonationsRequest } from '../api/auth';
+import { ReporteDonaciones } from '../components/ReporteDonaciones';
 
 
 
@@ -32,19 +32,28 @@ const Donaciones = () => {
 
     const [isCedulaNotFound, setIsCedulaNotFound] = useState(false);
 
-    const [donationItems, setDonationItems] = useState([]);   
-    const [donationCedula, setDonationCedula] = useState("");   
-    const [donationItemName, setDonationItemName] = useState("");   
-    const [donationItemQuantity, setDonationItemQuantity] = useState(0); 
- 
+    const [donationItems, setDonationItems] = useState([]);  // Para la lista de donaciones
+    const [donationCedula, setDonationCedula] = useState("");  // Para la cédula
+    const [donationItemName, setDonationItemName] = useState("default");  // Nombre del artículo
+    const [donationItemQuantity, setDonationItemQuantity] = useState(0);  // Cantidad del artículo
+    
 
 
-      const handleAddDonationItem = () => {
-        setDonationItems([
-          ...donationItems,
-          { name: donationItemName, quantity: donationItemQuantity }
-        ]);
-      };
+    const handleAddDonationItem = () => {
+        if (donationItemName === 'default') {
+            alert("Selecciona un item!")
+        }else{
+            if (donationItemQuantity > 0 && donationItemQuantity < 100) {
+                // Agregar artículo a la lista de donaciones
+                const newDonationItems = [...donationItems, { name: donationItemName, quantity: Number(donationItemQuantity) }];
+                setDonationItems(newDonationItems);
+                setDonationItemQuantity(0);
+                setDonationItemName("default");  // Limpiar campo de nombre del artículo
+            } else {
+                alert("Cantidad no válida, debe ser entre 1 y 99.");
+            }
+        }
+    };
 
     const handleRemoveDonationItem = (index) => {
         const updatedItems = [...donationItems];
@@ -87,12 +96,11 @@ const Donaciones = () => {
  
     const handleChangeQuantity = (e) => { setItemQuantity(e.target.value) } 
     const handleChangeNewItemName = (e) =>{ setNewItemName(e.target.value) }
-    const handleCamapaignName = e => { setCampaignName(e.target.value) }
+    const handleCampaignName = e => { setCampaignName(e.target.value) }
 
     const [showModal, setShowModal] = useState(false);
-
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+    const handleOpenModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
 
 
     const handleCedulaSubmit = async () => {
@@ -193,8 +201,6 @@ const handleUpdateBeneficiary = async () => {
         }
     }
 
- 
-
     const handleClickNewItem = () => {
         if (itemQuantity > 0 && itemQuantity < 100){
             if (newItemName !== ''){
@@ -238,28 +244,27 @@ const handleUpdateBeneficiary = async () => {
         }
     }
 
+    const handleSubmitAssignDonations = async () =>{
+        const form = {
+            ci: donationCedula,
+            items: donationItems
+        }
+        const response = await assignDonationsRequest(form)
+        if (Object.keys(response).includes('response')) {
+            console.log(response.response.data.msg)
+        }else {
+            setDonationCedula('')
+            setDonationItems([])
+            
+            console.log(response)
+        }
+    }
+
     useEffect(()=>{
         setItems(items)
     },[items])
 
     
-    const handleRegisterDonations = async () => {
-        const donationData = donationItems.map(item => ({
-          donationItemName: item.name,
-          quantity: item.quantity
-        }));
-    
-        const response = await assignDonationItemsRequest(donationData); // Llamar a la función del archivo auth.js
-    
-        if (response) {
-          alert('Donaciones registradas correctamente');
-          setDonationItems([]); // Limpiar la lista de donaciones después del registro
-        } else {
-          alert('Hubo un error al registrar las donaciones');
-        }
-      };
-
-
     return (
         <div className="p-4 md:p-8 bg-gray-100 min-h-screen flex flex-col items-center">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -289,7 +294,7 @@ const handleUpdateBeneficiary = async () => {
                     <h3 className="text-lg font-semibold mb-4 text-center">Agregar campaña</h3>
                     <div className="space-y-4 w-full">
                         <label className="flex justify-between items-center">
-                            <input onChange={handleCamapaignName} value={campaignName} type="text" placeholder="Nombre de la Campaña" className="w-full ml-1 p-1 border rounded-md" />
+                            <input onChange={handleCampaignName} value={campaignName} type="text" placeholder="Nombre de la Campaña" className="w-full ml-1 p-1 border rounded-md" />
                         </label>
                         {items.map((item, index) => (
                             <div key={index} className='flex justify-between items-center'>
@@ -477,7 +482,7 @@ const handleUpdateBeneficiary = async () => {
     
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
                     <h3 className="text-lg font-semibold mb-4 text-center">Donaciones</h3>
-                    <form className="space-y-7 w-full">
+                    <div className="space-y-7 w-full">
                         {/* Campo para cédula */}
                         <label className="flex justify-between items-center">
                             <input
@@ -492,6 +497,7 @@ const handleUpdateBeneficiary = async () => {
                         {/* Selección de objetos */}
                         <label className="flex justify-between items-center">
                             <select onChange={(e) => setDonationItemName(e.target.value)} value={donationItemName} className="w-40 p-2 border rounded-md">
+                                <option defaultChecked value={"default"}>Selecciona un item</option>
                                 {donations.map(donation => (
                                     <option key={donation[1]._id} value={donation[1].name}>{donation[1].name}</option>
                                 ))}
@@ -531,17 +537,17 @@ const handleUpdateBeneficiary = async () => {
                         {/* Botón para guardar las donaciones */}
                         <div className="flex justify-center mt-4">
                             <button
-                                onClick={handleRegisterDonations} // Aquí puedes definir qué hacer con los datos de donaciones
+                                onClick={handleSubmitAssignDonations} // Aquí puedes definir qué hacer con los datos de donaciones
                                 className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
                             >
                                 Registrar Donaciones
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
     
-            {showReport && <Reporte toggleReport={toggleReport} />}
+            {showReport && <ReporteDonaciones toggleReport={toggleReport} />}
             {showModal && <ShowCampaigns onClose={handleCloseModal} />}
         </div>
     );
