@@ -28,71 +28,35 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
 
   const onSubmit = async (data) => {
     try {
-      const payloadUpdateState = {
-        state: false
-      }
-      const payloadUpdateState2 = {
-        state: true
-      }
-      const state = await updatePatientStateRequest(data.ci, payloadUpdateState)
       const formData = {
         h_number: h_number,
         ...data,
         admissionDate: data.admissionDate ? formatDate(data.admissionDate) : '',
         admissionTime: data.admissionTime ? transformTimetoString(data.admissionTime) : '',
-      }
-      console.log(formData.ci);
-      if (state) {
-        const patient = await getPatientByCiRequest(formData.ci)
-        console.log(patient)
-        if (patient) {
-          const response = await registerInRoomRequest(formData)
-          console.log(response);
-          if (response.msg === 'Patient registered') {
-            onComplete(formData)
-          } else {
-            onComplete()
-          }
-        } else {
-          const response = await createPatientRequest(formData)
-          console.log(response);
-          if (response.msg === 'Patient created') {
-            onComplete(formData)
-          } else {
-            onComplete()
-          }
+      };
+      if (initialData.name !== '---') {
+        const response = await registerInRoomRequest(formData);
+        if (response.msg === 'Patient registered'){
+          onComplete(formData);
         }
+        onClose();
+        return;
       }
-      await updatePatientStateRequest(data.ci, payloadUpdateState2)
+      await createPatientRequest(formData);
+      const response = await registerInRoomRequest(formData);
+      if (response.msg === 'Patient registered'){
+        onComplete(formData);
+      }
+      onClose();
     } catch (error) {
-      console.log(error)
-      setError({ type: 'Error: ', message: error.response.data.msg })
-      if (error.response.data.msg === 'Patient not found') {
-        const payloadUpdateState = {
-          state: false
-        }
-        const payloadUpdateState2 = {
-          state: true
-        }
-        await updatePatientStateRequest(data.ci, payloadUpdateState)
-        const formData = {
-          h_number: h_number,
-          ...data,
-          admissionDate: data.admissionDate ? formatDate(data.admissionDate) : '',
-          admissionTime: data.admissionTime ? transformTimetoString(data.admissionTime) : '',
-        }
-        const response = await registerInRoomRequest(formData)
-        if (response.msg === 'Patient registered') {
-          onComplete(formData)
-        } else {
-          onComplete()
-        }
-        await updatePatientStateRequest(data.ci, payloadUpdateState2)
-        await createPatientRequest(formData)
-        onComplete(formData)
+      console.error(error);
+      if (error.response.data.msg === 'Patient already admitted') {
+        setError({ type: 'Error: ', message: 'El paciente ya está registrado en otra habitación' });
       }
+      
     }
-  }
+  };
+  
 
   const onSearch = async (data) => {
     try {
@@ -103,7 +67,12 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
       setValue('ci', patient.ci)
     } catch (error) {
       console.log(error)
-      setError({ type: 'Error: ', message: error.response.data.msg })
+      if (error.response.data.msg === 'Patient not found') {
+        setError({ type: 'Error: ', message: 'Paciente no encontrado' });
+      }
+      if (error.response.data.msg === 'Patient already admitted') {
+        setError({ type: 'Error: ', message: 'El paciente ya está registrado en una habitación' });
+      }
     }
   }
 
