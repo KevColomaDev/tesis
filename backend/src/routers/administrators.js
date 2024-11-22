@@ -1,10 +1,11 @@
 import { Router } from 'express'
-import { login, registerInRoom, getDataRoom, setParamsinBlank, dietData, logout, verifyToken, createRoom, getRooms, deleteRoom, registerSocialWorker, deleteSocialWorker, getSocialWorkers, createPatient, getPatientByCi, getPatientState, updatePatientState, getReports } from '../controllers/administrators.js'
+import { login, registerInRoom, getDataRoom, setParamsinBlank, dietData, logout, verifyToken, createRoom, getRooms, deleteRoom, registerSocialWorker, deleteSocialWorker, getSocialWorkers, createPatient, getPatientByCi, getPatientState, updatePatientState, getReports, getRole } from '../controllers/administrators.js'
 import { authLogin } from '../middlewares/authLogin.js'
 
 export const router = Router()
 
 router.post('/login', login)
+router.get('/role', authLogin, getRole)
 router.post('/new-social-worker', authLogin, registerSocialWorker)
 router.delete('/social-worker/:id', authLogin, deleteSocialWorker)
 router.get('/test', authLogin, (req, res) => res.send('test'))

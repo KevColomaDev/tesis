@@ -1,11 +1,14 @@
 import axios from "axios"
 
-const administratorAPI = 'http://localhost:4321/administrators'
-const socialWorkersAPI = 'http://localhost:4321/social-workers'
-const suppliesAPI = 'http://localhost:4321/supplies'
-const donationsAPI = 'http://localhost:4321/donations'
-// const administratorAPI = 'https://examen-full-stack-backend.onrender.com/administrators'
-// const suppliesAPI = 'https://examen-full-stack-backend.onrender.com/supplies'
+const administratorAPI = 'https://tesis-yw0r.onrender.com/administrators'
+const socialWorkersAPI = 'https://tesis-yw0r.onrender.com/social-workers'
+const suppliesAPI = 'https://tesis-yw0r.onrender.com/supplies'
+const donationsAPI = 'https://tesis-yw0r.onrender.com/donations'
+
+// const administratorAPI = 'http://localhost:4321/administrators'
+// const socialWorkersAPI = 'http://localhost:4321/social-workers'
+// const suppliesAPI = 'http://localhost:4321/supplies'
+// const donationsAPI = 'http://localhost:4321/donations'
 
 export const loginRequest = async (user) => {
   const response = await axios.post(`${administratorAPI}/login`, user, { withCredentials: true })
@@ -64,6 +67,10 @@ export const registerInRoomRequest = async (data) => {
 export const logoutRequest = async () => {
   const response = await axios.get(`${administratorAPI}/logout`, { withCredentials: true })
   return response.data
+}
+export const getRoleRequest = async () => {
+  const response = await axios.get(`${administratorAPI}/role`, { withCredentials: true })
+  return response
 }
 
 export const verifyRequest = async () => {

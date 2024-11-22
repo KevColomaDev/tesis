@@ -51,6 +51,14 @@ export const login = async (req, res) => {
     console.log(error)
   }
 }
+export const getRole = async (req, res) => {
+  try {
+    const role = req.user
+    return res.status(200).json(role)
+  } catch (error) {
+    return res.status(500).json(error)
+  }
+}
 export const getSocialWorkers = async (req, res) => {
   const allSocialWorkers = await socialWorkers.getSocialWorkers()
   return res.status(200).json(allSocialWorkers)

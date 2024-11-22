@@ -1,11 +1,12 @@
 import { createContext, useEffect, useState } from "react";
 import PropTypes from 'prop-types';
-import { verifyRequest, logoutRequest } from "../api/auth";
+import { verifyRequest, logoutRequest, getRoleRequest } from "../api/auth";
 
 export const SessionContext = createContext();
 
 export const SessionProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState({});
 
   const logout = async () => {
     try {
@@ -15,6 +16,16 @@ export const SessionProvider = ({ children }) => {
       console.log(error);
     }
   };
+
+  const getRole = async () => {
+    try {
+      const response = await getRoleRequest()
+      setUser(response.data)
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const verify = async () => {
     try {
@@ -34,11 +45,16 @@ export const SessionProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated) {
       verify()
+      getRole()
     }
   }, [isAuthenticated])
+  useEffect(() => {
+    verify()
+    getRole()
+  },[])
 
   return (
-    <SessionContext.Provider value={{ isAuthenticated, logout, setIsAuthenticated, verify }}>
+    <SessionContext.Provider value={{ isAuthenticated, logout, setIsAuthenticated, verify, user, setUser }}>
       {children}
     </SessionContext.Provider>
   );
