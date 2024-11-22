@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authLogin } from '../middlewares/authLogin.js'
-import { createCampaign, getCampaigns, getDonations, verifyCedula, createBeneficiary, updateBeneficiary, assignBeneficiary, getReports, getCampaignsReports } from '../controllers/donations.js'
+import { createCampaign, getCampaigns, getDonations, verifyCedula, createBeneficiary, updateBeneficiary, assignBeneficiary, getReports, getCampaignsReports, getCampaignsByDate  } from '../controllers/donations.js'
 
 export const routerDonations = Router()
 
@@ -16,3 +16,6 @@ routerDonations.put('/assign-donations', authLogin, assignBeneficiary)
 // Manage Reports
 routerDonations.post('/reports', authLogin, getReports)
 routerDonations.post('/campaigns-reports', authLogin, getCampaignsReports)
+
+// MOSTRAR CAMPA;AS
+routerDonations.get('/campaigns-by-date', authLogin, getCampaignsByDate);

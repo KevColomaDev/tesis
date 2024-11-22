@@ -201,6 +201,20 @@ export const createCampaignRequest = async (data) => {
   }
 }
 
+// MOSTRAR CAMPANAS
+export const getCampaignsByDateRequest = async (date) => {
+  try {
+    // Convertir la fecha a MM/DD/YYYY
+    const formattedDate = new Date(date).toLocaleDateString('en-US');  // Convierte la fecha a MM/DD/YYYY
+
+    const response = await axios.get(`${donationsAPI}/campaigns-by-date?date=${formattedDate}`, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    return null;  // En caso de error, se devuelve null o un valor que indique fallo
+  }
+};
+
 export const verifyCedulaRequest = async (cedula) => {
   try {
     const response = await axios.post(`${donationsAPI}/verify`, { cedula },  { withCredentials: true }  );

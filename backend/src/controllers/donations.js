@@ -25,6 +25,30 @@ export const getDonations = async (req, res) => {
   }
 }
 
+// ---------------------------- CODIGO MOSTRAR CAMPANAS --------------------------
+export const getCampaignsByDate = async (req, res) => {
+  try {
+    const { date } = req.query;  
+
+    if (!date) {
+      console.log('Error: No se proporcionó la fecha.');
+      return res.status(400).json({ error: 'No se proporcionó la fecha' });
+    }
+
+    console.log('Fecha recibida:', date);
+
+    const campaigns = await campaigns.getCampaigns(date);  
+    console.log('Campañas encontradas:', campaigns);
+
+    return res.status(200).json(campaigns);
+  } catch (error) {
+    console.error('Error al obtener campañas:', error.message);
+    return res.status(500).json({ error: 'Error al obtener campañas' });
+  }
+};
+// --------------------------------------------------------------------------------
+
+
 export const createCampaign = async (req, res) => {
   try {
     const campaignInput = validateCampaign(req.body)
