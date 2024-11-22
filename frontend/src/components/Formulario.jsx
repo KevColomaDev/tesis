@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { registerInRoomRequest, createPatientRequest, getPatientByCiRequest, updatePatientStateRequest } from '../api/auth';
+import { registerInRoomRequest, createPatientRequest, getPatientByCiRequest } from '../api/auth';
 import { Mensaje } from './Message';
 
 const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
@@ -42,10 +42,10 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
         onClose();
         return;
       }
-      await createPatientRequest(formData);
       const response = await registerInRoomRequest(formData);
       if (response.msg === 'Patient registered'){
         onComplete(formData);
+        await createPatientRequest(formData);
       }
       onClose();
     } catch (error) {
@@ -53,7 +53,9 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
       if (error.response.data.msg === 'Patient already admitted') {
         setError({ type: 'Error: ', message: 'El paciente ya está registrado en otra habitación' });
       }
-      
+      if (error.response.data.msg === 'Invalid admission date') {
+        setError({ type: 'Error: ', message: 'Fecha de ingreso inválida' });
+      }
     }
   };
   

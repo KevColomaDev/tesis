@@ -33,8 +33,16 @@ const Habitaciones = () => {
   }, []);
 
   const removeRoom = async () => {
+    if (rooms.length === 0) {
+      return;
+    }
     const lastRoom = rooms[rooms.length - 1];
+    // Verify if room is empty
+    if (lastRoom.name !== '---') {
+      return alert('No se puede eliminar una habitación ocupada');
+    }
     await deleteRoomRequest(lastRoom.h_number);
+
     setRooms(prevRooms => prevRooms.slice(0, -1));
     window.location.reload();
   };
