@@ -28,26 +28,22 @@ export const getDonations = async (req, res) => {
 // ---------------------------- CODIGO MOSTRAR CAMPANAS --------------------------
 export const getCampaignsByDate = async (req, res) => {
   try {
-    const { date } = req.query;  
+    const { date } = req.query
 
     if (!date) {
-      console.log('Error: No se proporcionó la fecha.');
-      return res.status(400).json({ error: 'No se proporcionó la fecha' });
+      console.log('Error: No se proporcionó la fecha.')
+      return res.status(400).json({ error: 'No se proporcionó la fecha' })
     }
 
-    console.log('Fecha recibida:', date);
+    const transformedDate = date.replace(/\/0(\d)\//, '/$1/')
 
-    const campaigns = await campaigns.getCampaigns(date);  
-    console.log('Campañas encontradas:', campaigns);
-
-    return res.status(200).json(campaigns);
+    const campaignsFound = await campaigns.getCampaigns(transformedDate)
+    return res.status(200).json(campaignsFound)
   } catch (error) {
-    console.error('Error al obtener campañas:', error.message);
-    return res.status(500).json({ error: 'Error al obtener campañas' });
+    console.error('Error al obtener campañas:', error.message)
+    return res.status(500).json({ error: 'Error al obtener campañas' })
   }
-};
-// --------------------------------------------------------------------------------
-
+}
 
 export const createCampaign = async (req, res) => {
   try {

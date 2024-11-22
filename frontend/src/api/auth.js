@@ -204,8 +204,8 @@ export const createCampaignRequest = async (data) => {
 // MOSTRAR CAMPANAS
 export const getCampaignsByDateRequest = async (date) => {
   try {
-    // Convertir la fecha a MM/DD/YYYY
-    const formattedDate = new Date(date).toLocaleDateString('en-US');  // Convierte la fecha a MM/DD/YYYY
+    const [year, month, day] = date.split('-'); // Divide la fecha en partes
+    const formattedDate = `${month}/${day}/${year}`
 
     const response = await axios.get(`${donationsAPI}/campaigns-by-date?date=${formattedDate}`, { withCredentials: true });
     return response.data;
