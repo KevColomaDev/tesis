@@ -14,84 +14,111 @@ import { SessionProvider } from "./context/SessionContext";
 import CreateUser from "./paginas/CreateUser";
 import UsersTable from "./paginas/UsersTable";
 import UpdatePassword from "./paginas/UpdatePassword";
+import ProtectedRoute from "./context/ProtectedRoute";
 
 const App = () => {
   return (
     <SessionProvider>
       <Router>
         <Routes>
-          {/* Ruta para login sin Header */}
+          {/* Ruta pública para login */}
           <Route path="/login" element={<Login />} />
 
-          {/* Ruta para habitaciones con Header */}
+          {/* Rutas protegidas */}
           <Route
             path="/habitaciones"
             element={
-              <>
-                <Header />
-                <Habitaciones />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <Habitaciones />
+                  </>
+                }
+              />
             }
           />
-
           <Route
             path="/suministros"
             element={
-              <>
-                <Header />
-                <Suministros />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <Suministros />
+                  </>
+                }
+              />
             }
           />
-
           <Route
             path="/donaciones"
             element={
-              <>
-                <Header />
-                <Donaciones />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <Donaciones />
+                  </>
+                }
+              />
             }
           />
           <Route
             path="/actualizar-password"
             element={
-              <>
-                <Header />
-                <UpdatePassword />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <UpdatePassword />
+                  </>
+                }
+              />
             }
           />
           <Route
             path="/admin"
             element={
-              <>
-                <Header />
-                <AdminOptions />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <AdminOptions />
+                  </>
+                }
+              />
             }
           />
           <Route
             path="/admin/crear-usuario"
             element={
-              <>
-                <Header />
-                <CreateUser />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <CreateUser />
+                  </>
+                }
+              />
             }
           />
           <Route
             path="/admin/usuarios"
             element={
-              <>
-                <Header />
-                <UsersTable />
-              </>
+              <ProtectedRoute
+                element={
+                  <>
+                    <Header />
+                    <UsersTable />
+                  </>
+                }
+              />
             }
           />
 
-          {/* Redirecciona a login por defecto */}
-          <Route path="/" element={<Navigate to="/login" />} />
+          {/* Redirección por defecto */}
+          <Route path="/" element={<Navigate to="/habitaciones" />} />
         </Routes>
       </Router>
     </SessionProvider>

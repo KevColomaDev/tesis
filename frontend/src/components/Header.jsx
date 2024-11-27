@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/Logo.png';
-import user from '../assets/user.png';
+import userImage from '../assets/user.png';
 import { logoutRequest } from '../api/auth';
+import { SessionContext } from '../context/SessionContext';
 
 export default function Header() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {user, setUser} = useContext(SessionContext)
   const menuRef = useRef(null);
 
   const toggleMenu = () => {
@@ -33,6 +35,7 @@ export default function Header() {
     console.log(response)
   }
   useEffect(() => {
+    console.log(user)
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -119,7 +122,7 @@ export default function Header() {
                 >
                   <span className="absolute -inset-1.5"></span>
                   <span className="sr-only">Open user menu</span>
-                  <img className="h-8 w-8 rounded-full" src={user} alt="user" />
+                  <img className="h-8 w-8 rounded-full" src={userImage} alt="user" />
                 </button>
 
                 {/* Dropdown menu */}
@@ -132,7 +135,7 @@ export default function Header() {
                     aria-labelledby="user-menu-button"
                     tabIndex="-1"
                   >
-                    <Link
+                    {user?.administratorLogin && <Link
                       onClick={()=> setIsMenuOpen(false)}
                       to="/admin"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
@@ -142,7 +145,8 @@ export default function Header() {
                     >
                       Opciones del administrador
                     </Link>
-                    <Link
+                    }
+                    {user?.socialWorkersLogin && <Link
                       onClick={()=> setIsMenuOpen(false)}
                       to="/actualizar-password"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
@@ -152,6 +156,7 @@ export default function Header() {
                     >
                       Actualizar Contraseña
                     </Link>
+                    }
                     <Link
                       to="/login"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
@@ -239,26 +244,26 @@ export default function Header() {
             <div className="border-t border-gray-700 pb-3 pt-4">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">
-                  <img className="h-10 w-10 rounded-full" src={user} alt="user" />
+                  <img className="h-10 w-10 rounded-full" src={userImage} alt="user" />
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium leading-none text-white">Nombre Usuario</div>
-                  <div className="mt-1 text-sm font-medium leading-none text-gray-400">email@example.com</div>
+                  <div className="text-base font-medium leading-none text-white">{user?.socialWorkersLogin?.name || 'Admin'}</div>
+                  <div className="mt-1 text-sm font-medium leading-none text-gray-400">{user?.socialWorkersLogin?.email || user?.administratorLogin?.email}</div>
                 </div>
               </div>
               <div className="mt-3 space-y-1" onClick={closeMobileMenu}>
-                <Link
+                {user?.socialWorkersLogin && <Link
                   to="/actualizar-password"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                 >
-                  Cambiar Contraseña
-                </Link>
-                <Link
+                  Actualizar Contraseña
+                </Link>}
+                {user?.administratorLogin && <Link
                   to="/admin"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                 >
                   Opciones del administrador
-                </Link>
+                </Link>}
                 <Link
                   to="/login"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"

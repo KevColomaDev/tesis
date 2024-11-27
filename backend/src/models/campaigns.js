@@ -14,18 +14,18 @@ export const campaigns = {
 
  // CORREGIDO PARA MOSTRAR CAMPA;AS -----------------------------------
 
- async getCampaigns(date) {
-  try {
-    const query = { donationDate: date };  // Asegúrate de que donationDate esté en el formato correcto en la base de datos
-    console.log('Consulta para MongoDB:', query);
+  async getCampaigns (date) {
+    try {
+      const query = { donationDate: date }
+      console.log('Consulta para MongoDB:', query)
 
-    const campaigns = await collectionCampaigns.find(query).toArray();
-    return campaigns;
-  } catch (error) {
-    console.error('Error en getCampaigns:', error.message);
-    throw error;  // Asegúrate de lanzar el error para que sea manejado en el controlador
-  }
-},
+      const campaigns = await collectionCampaigns.find(query).toArray()
+      return campaigns
+    } catch (error) {
+      console.error('Error en getCampaigns:', error.message)
+      throw error
+    }
+  },
   async getReports (initialDate, finalDate) {
     try {
       const reportsData = await collectionCampaigns.find({ donationDate: { $gte: initialDate, $lte: finalDate } }).toArray()

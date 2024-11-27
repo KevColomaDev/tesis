@@ -9,7 +9,7 @@ import { SessionContext } from '../context/SessionContext';
 export default function Login() {
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState({});
-  const { setIsAuthenticated ,isAuthenticated } = useContext(SessionContext);
+  const { setIsAuthenticated ,isAuthenticated, setUser } = useContext(SessionContext);
 
 
   const navigate = useNavigate();
