@@ -145,7 +145,7 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
           </div>
         </div>
         <h3 className="text-lg font-semibold mb-4 text-center">Ingreso de paciente</h3>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form className='relative flex flex-wrap items-stretch gap-2' onSubmit={handleSubmit(onSubmit)}>
           {/* Campo de nombre */}
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Nombre</label>
@@ -285,17 +285,17 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
             {errors.observaciones && <p className="text-red-500 text-sm">{errors.observaciones.message}</p> }
           </div>
 
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-between mt-4 gap-2 items-center">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm"
+              className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm mb-4"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm mb-4"
             >
               Guardar
             </button>
