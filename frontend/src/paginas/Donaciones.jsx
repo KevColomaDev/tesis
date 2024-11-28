@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ShowCampaigns from '../components/showCampaigns';
 import { createCampaignRequest, getAllDonationsRequest, verifyCedulaRequest, createBeneficiaryRequest, updateBeneficiaryRequest, assignDonationsRequest } from '../api/auth';
 import { ReporteDonaciones } from '../components/ReporteDonaciones';
+import { Mensaje } from '../components/Message';
 
 
 
@@ -36,8 +37,8 @@ const Donaciones = () => {
     const [donationCedula, setDonationCedula] = useState("");  // Para la cédula
     const [donationItemName, setDonationItemName] = useState("default");  // Nombre del artículo
     const [donationItemQuantity, setDonationItemQuantity] = useState(0);  // Cantidad del artículo
+    const [message, setMessage] = useState({});
     
-
 
     const handleAddDonationItem = () => {
         if (donationItemName === 'default') {
@@ -125,7 +126,8 @@ const Donaciones = () => {
     };
 
 
-    const handleCreateBeneficiary = async () => {
+    const handleCreateBeneficiary = async (e) => {
+        e.preventDefault();
         const beneficiaryData = {
           cedula,
           nombre,
@@ -138,13 +140,14 @@ const Donaciones = () => {
           const result = await createBeneficiaryRequest(beneficiaryData);
       
           if (result) {
+            setMessage({});
             alert("Beneficiario creado exitosamente");
           } else {
-            alert("Hubo un error al crear el beneficiario");
+            setMessage({ type: 'Error: ', message: 'Hubo un error al crear el beneficiario' });
           }
         } catch (error) {
           console.error('Error al crear el beneficiario:', error);
-          alert("Hubo un error inesperado al crear el beneficiario");
+          setMessage({ type: 'Error: ', message: error });
         }
       };
 
@@ -161,9 +164,11 @@ const handleUpdateBeneficiary = async () => {
             
             const response = await updateBeneficiaryRequest(updatedData);
             if (response) {
+                setMessage({});
                 alert("Beneficiario actualizado exitosamente");
+
             } else {
-                alert("Error al actualizar el beneficiario");
+                setMessage({ type: 'Error: ', message: 'Hubo un error al actualizar el beneficiario' });
             }
         } catch (error) {
             console.error("Error al actualizar el beneficiario:", error);
@@ -232,31 +237,46 @@ const handleUpdateBeneficiary = async () => {
             name: campaignName,
             items: items
         }
-        const response = await createCampaignRequest(form);
-        if (Object.keys(response).includes('response')) {
-            console.log(response.response.data.msg)
-        }else {
+        try {
+            const response = await createCampaignRequest(form);
+            if (response.response.data[0].message === 'String must contain at least 1 character(s)') {
+                setMessage({ type: 'Error: ', message: 'La campaña debe tener un nombre' });
+            }
+        } catch (error) {
+            console.log(error);
+            setMessage({});
             setCampaignName('')
             setItems([])
             setItemQuantity(0)
-            
-            console.log(response)
+            return alert('Campaña creada exitosamente')
         }
     }
 
     const handleSubmitAssignDonations = async () =>{
-        const form = {
-            ci: donationCedula,
-            items: donationItems
-        }
-        const response = await assignDonationsRequest(form)
-        if (Object.keys(response).includes('response')) {
-            console.log(response.response.data.msg)
-        }else {
-            setDonationCedula('')
-            setDonationItems([])
-            
-            console.log(response)
+        try {
+            const form = {
+                ci: donationCedula,
+                items: donationItems
+            }
+            const response = await assignDonationsRequest(form)
+            console.log('respuesta', response);
+            if (response.msg === 'Beneficiary does not exist') {
+                setMessage({ type: 'Error: ', message: 'El beneficiario no existe' });
+            }
+            if (response.msg === 'No items found') {
+                setMessage({ type: 'Error: ', message: 'No se asignaron items' });
+            }
+            if (response.ci) {
+                setDonationCedula('')
+                setDonationItems([])
+                alert('Donaciones asignadas exitosamente')
+                setMessage({})
+            }
+            if(response.errors[0].message === 'CI must be exactly 10 digits'){
+                setMessage({ type: 'Error: ', message: 'CI debe tener exactamente 10 digitos' });
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -287,6 +307,10 @@ const handleUpdateBeneficiary = async () => {
                 >
                     Generar Reporte
                 </button>
+            </div>
+
+            <div className="sm:mx-auto sm:w-full sm:max-w-sm aspect-[9/1] mb-10">
+                {Object.keys(message).length > 0 && <Mensaje type={message.type} message={message.message}/>}
             </div>
     
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center"> {/* Ajuste a 3 columnas en pantallas grandes */}
