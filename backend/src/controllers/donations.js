@@ -4,6 +4,7 @@ import { validateCampaign } from '../schemas/createCampaign.js'
 import { beneficiaries } from '../models/beneficiaries.js'
 import { collectionReportDonations, reportDonations } from '../models/reportsDonations.js'
 import { validateAssignDonations } from '../schemas/assignDonations.js'
+import { sendMailToBeneficiary } from '../config/nodemailer.js'
 
 export const getCampaigns = async (req, res) => {
   try {
@@ -154,11 +155,12 @@ export const updateBeneficiary = async (req, res) => {
     console.error('Error al actualizar el beneficiario:', error)
     return res.status(500).json({ msg: 'Error al actualizar el beneficiario', error: error.message })
   }
-};
+}
 
 export const assignBeneficiary = async (req, res) => {
   try {
     const donationsInput = validateAssignDonations(req.body)
+    console.log(donationsInput)
     if (Object.keys(donationsInput).includes('issues')) {
       return res.status(400).json({ errors: donationsInput.issues })
     }
@@ -188,6 +190,7 @@ export const assignBeneficiary = async (req, res) => {
         return res.status(400).json({ msg: 'Donation(s) do(es) not exists.' })
       }
     }
+    sendMailToBeneficiary(beneficiary.email, donationsInput.items)
     // Make report
     const report = {
       ci: donationsInput.ci,

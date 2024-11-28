@@ -157,7 +157,7 @@ export const registerInRoom = async (req, res) => {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
     const currentDate = new Date()
-    const currentAdmissionDate = currentDate.toLocaleDateString()
+    const currentAdmissionDate = currentDate.toLocaleDateString('es-ES')
     console.log(currentAdmissionDate)
     const currentTime = currentDate.toLocaleTimeString()
     console.log(currentTime)

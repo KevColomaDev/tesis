@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
 
 dotenv.config()
 
@@ -77,13 +77,33 @@ export const sendMailToSocialWorker = (userMail, password, token) => {
     <p style="font-weight: bold;">Tus credenciales son las siguientes:</p>
     <p>Correo electrónico: ${userMail}</p>
     <p>Contraseña: ${password}</p>
-    <p>No olvides restablecer tu contraseña.`,
+    <p>No olvides restablecer tu contraseña.`
   }
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error)
     } else {
-      console.log('Correo de registro exitoso enviado: ' + info.response);
+      console.log('Correo de registro exitoso enviado: ' + info.response)
+    }
+  })
+}
+
+export const sendMailToBeneficiary = (userMail, donationItem, token) => {
+  const mailOptions = {
+    from: process.env.USER_MAILTRAP,
+    to: userMail,
+    subject: '¡Felicitaciones!',
+    html: `<p>Ha sido regristrado para poder recibir donaciones</p>
+    <br>
+    <p style="font-weight: bold;">Los detalles de la donacion son los siguientes:</p>
+    <p>Donacion: ${donationItem}</p>
+    <p>Esperamos que te recuperes lo mas pronto posible</p>`
+  }
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error)
+    } else {
+      console.log('Correo de registro exitoso enviado: ' + info.response)
     }
   })
 }
