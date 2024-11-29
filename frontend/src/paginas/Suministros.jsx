@@ -4,9 +4,11 @@ import {
   addStockRequest,
   assignSuppliesRequest,
   deleteSupplyRequest,
+  getAllRoomsRequest,
   getAllSuppliesRequest,
 } from "../api/auth";
 import SupplyForm from "../components/SupplyForm";
+import { Mensaje } from "../components/Message";
 
 const Suministros = () => {
   const [showReport, setShowReport] = useState(false);
@@ -15,22 +17,38 @@ const Suministros = () => {
   const [form, setForm] = useState({});
   const [formAssign, setFormAssign] = useState({});
   const [room, setRoom] = useState(1);
+  const [numberRooms, setNumberRooms] = useState(1);
+
+  //Message states
+  const [typeMessage, setTypeMessage] = useState('')
+  const [message, setMessage] = useState('')
+
+  //Loading states
+  const [loadingAddStock, setLoadingAddStock] = useState(false)
+  const [loadingAssign, setLoadingAssign] = useState(false)
+  const [loadingDelete, setLoadingDelete] = useState(false)
 
   useEffect(() => {
-    const suppliesData = async () => {
-      const aux = await getAllSuppliesRequest();
-      const suppliesArray = Object.entries(aux);
-      setSupplies(suppliesArray);
-    };
     suppliesData();
-  }, [supplies]);
+    setNRooms();
+  }, []);
+
+  const setNRooms = async () => {
+    setNumberRooms(await getAllRoomsRequest())
+  }
+  const suppliesData = async () => {
+    const aux = await getAllSuppliesRequest();
+    const suppliesArray = Object.entries(aux);
+    setSupplies(suppliesArray);
+  };
 
   const toggleReport = () => {
     setShowReport(!showReport);
   };
 
-  const toggleSupplyForm = () => {
+  const toggleSupplyForm = async () => {
     setShowSupplyForm(!showSupplyForm);
+    await suppliesData();
   };
 
   const handleChange = (e) => {
@@ -50,39 +68,102 @@ const Suministros = () => {
     e.preventDefault();
     const suppliesArray = Object.keys(form).map((key) => [key, form[key]]);
     suppliesArray.map(async (supply) => {
-      const response = await addStockRequest(supply[0], {
-        quantity: supply[1],
-      });
-      if (response) {
-        form[supply[0]] = 0;
+      try {
+        setLoadingAddStock(true)
+        const response = await addStockRequest(supply[0], {
+          quantity: supply[1],
+        });
+        if (response) {
+          form[supply[0]] = '';
+          await suppliesData();
+          setMessage(response.msg || response.data.msg)
+          setTypeMessage(response.status === 400 ? 'Error: ': '')
+          setTimeout(()=>{
+            setMessage('')
+            setTypeMessage('')
+          },3000)
+        }        
+      } catch (error) {
+        console.log(error)
+        setLoadingAddStock(false)
+      }finally{
+        setLoadingAddStock(false)
       }
     });
   };
 
   const handleSubmitAssign = async (e) => {
     e.preventDefault();
-    const suppliesData = []
-    Object.keys(formAssign).forEach((key) => suppliesData.push({name: key, quantity: formAssign[key]}));
-    const dataRequest = {
-      "supplies": suppliesData
+    const suppliesDataAssign = [];
+    Object.keys(formAssign).forEach((key) =>
+    {
+      if (formAssign[key]>0){
+        suppliesDataAssign.push({ name: key, quantity: formAssign[key] })
+      }
     }
-    const response = await assignSuppliesRequest(room,dataRequest)
-    if (response) {
-      console.log(response)
-      setRoom(1)
-      // Reset values
-      for (let key in formAssign) {
-        if (Object.prototype.hasOwnProperty.call(formAssign, key)) {
-          formAssign[key] = 0;
+    );
+    const dataRequest = {
+      supplies: suppliesDataAssign,
+    };
+    try {
+      setLoadingAssign(true)
+      const response = await assignSuppliesRequest(room, dataRequest);
+      if (response.status === 200) {
+        setRoom(1);
+        // Reset values
+        for (let key in formAssign) {
+          if (Object.prototype.hasOwnProperty.call(formAssign, key)) {
+            formAssign[key] = ''
+          }
         }
-      }                 
+        setMessage(response.data.msg)
+        setTimeout(()=>{
+          setMessage('')
+        },3000)
+        await suppliesData();
+      }else{
+        setTypeMessage('Error: ')
+        setMessage(response.data.msg)
+        setTimeout(()=>{
+          setTypeMessage('')
+          setMessage('')
+        }, 3000)
+      }
+    } catch (error) {
+      console.log(error)
+      setLoadingAssign(false)
+    }finally{
+      setLoadingAssign(false)
     }
   };
 
   //Consume delete supply endpoint
   const handleDeleteSupply = async (id) => {
-    const response = await deleteSupplyRequest(id);
-    console.log(response);
+    try {
+      setLoadingDelete(true)
+      const response = await deleteSupplyRequest(id);
+      console.log(response);
+      if (response.status === 200) {
+        setMessage(response.data.msg)
+        setTimeout(()=> {
+          setMessage('')
+        }, 3000)
+        await suppliesData();
+      }else{
+        setTypeMessage('Error: ')
+        setMessage(response.data.msg)
+        setTimeout(()=>{
+          setTypeMessage('')
+          setMessage('')
+        }, 3000)
+      }
+      
+    } catch (error) {
+      console.log(error)
+      setLoadingDelete(false)
+    } finally {
+      setLoadingDelete(false)
+    }
   };
 
   return (
@@ -109,7 +190,7 @@ const Suministros = () => {
                   onClick={() => handleDeleteSupply(supply[1]._id)}
                   className="text-center hover:cursor-pointer"
                 >
-                  Eliminar
+                  {loadingDelete ? 'Eliminando' : 'Eliminar'}
                 </span>
               </p>
             )}
@@ -131,6 +212,7 @@ const Suministros = () => {
         Generar Reporte
       </button>
 
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full justify-items-center">
         <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
           <h3 className="text-lg font-semibold mb-4 text-center">
@@ -139,9 +221,9 @@ const Suministros = () => {
           <form onSubmit={handleSubmit} className="space-y-4 w-full">
             {supplies.map((supply) => (
               <label
-                key={supply[1]._id}
+              key={supply[1]._id}
                 className="flex justify-between items-center"
-              >
+                >
                 {supply[1].name}:
                 <input
                   type="number"
@@ -151,15 +233,16 @@ const Suministros = () => {
                   min={0}
                   max="99"
                   className="w-20 p-2 border rounded-md"
-                />
+                  />
               </label>
             ))}
             <div className="flex justify-center">
               <button
                 type="submit"
                 className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-sky-950 transition-colors"
-              >
-                Ingresar
+                disabled={loadingAddStock}
+                >
+                {loadingAddStock ? 'Ingresando...' : 'Ingresar'}
               </button>
             </div>
           </form>
@@ -175,16 +258,16 @@ const Suministros = () => {
               <input
                 type="number"
                 min={1}
-                max={15}
+                max={numberRooms}
                 value={room}
                 onChange={handleChangeRoom}
                 className="w-20 p-2 border rounded-md"
-              />
+                />
             </label>
             {supplies.map((supply) => (
               <label
-                key={supply[1]._id}
-                className="flex justify-between items-center"
+              key={supply[1]._id}
+              className="flex justify-between items-center"
               >
                 {supply[1].name}:
                 <input
@@ -195,21 +278,23 @@ const Suministros = () => {
                   min={0}
                   max={99}
                   className="w-20 p-2 border rounded-md"
-                />
+                  />
               </label>
             ))}
             <div className="flex justify-center">
               <button
                 type="submit"
                 className="bg-sky-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-sky-950 transition-colors"
-              >
-                Asignar
+                disabled={loadingAssign}
+                >
+                {loadingAssign ? 'Asignando...' : 'Asignar'}
               </button>
             </div>
           </form>
         </div>
       </div>
-
+      
+      {message && <Mensaje type={typeMessage} message={message}/>}
       {showReport && <ReporteSuministros toggleReport={toggleReport} />}
       {showSupplyForm && <SupplyForm toggleSupplyForm={toggleSupplyForm} />}
     </div>

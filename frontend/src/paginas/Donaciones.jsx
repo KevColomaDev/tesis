@@ -67,14 +67,15 @@ const Donaciones = () => {
         setShowReport(!showReport);
     };
 
-    useEffect(() => {
-        const donationsData = async () => {
-            const aux = await getAllDonationsRequest()
-            const donationsArray = Object.entries(aux)
-            setDonations(donationsArray);
+    const donationsData = async () => {
+        const aux = await getAllDonationsRequest()
+        const donationsArray = Object.entries(aux)
+        setDonations(donationsArray);
     }
+
+    useEffect(() => {
         donationsData()
-    }, [donations])
+    }, [])
 
     const handleChange = (e) => {
         const selectedValue = e.target.value;
@@ -110,7 +111,7 @@ const Donaciones = () => {
             if (response) {
                 setBeneficiaryData(response.beneficiary);
                 setIsVerified(true);
-                setIsCedulaNotFound(false);  
+                setIsCedulaNotFound(false);
             } else {
                 setBeneficiaryData(null);
                 setIsVerified(false);
@@ -141,6 +142,7 @@ const Donaciones = () => {
       
           if (result) {
             setMessage({});
+            await donationsData()
             alert("Beneficiario creado exitosamente");
           } else {
             setMessage({ type: 'Error: ', message: 'Hubo un error al crear el beneficiario' });
@@ -165,6 +167,7 @@ const handleUpdateBeneficiary = async () => {
             const response = await updateBeneficiaryRequest(updatedData);
             if (response) {
                 setMessage({});
+                await donationsData()
                 alert("Beneficiario actualizado exitosamente");
 
             } else {
@@ -248,6 +251,7 @@ const handleUpdateBeneficiary = async () => {
             setCampaignName('')
             setItems([])
             setItemQuantity(0)
+            await donationsData()
             return alert('Campaña creada exitosamente')
         }
     }
@@ -271,6 +275,7 @@ const handleUpdateBeneficiary = async () => {
                 setDonationItems([])
                 alert('Donaciones asignadas exitosamente')
                 setMessage({})
+                await donationsData()
             }
             if(response.errors[0].message === 'CI must be exactly 10 digits'){
                 setMessage({ type: 'Error: ', message: 'CI debe tener exactamente 10 digitos' });
