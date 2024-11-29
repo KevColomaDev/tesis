@@ -160,9 +160,9 @@ export const getAllSuppliesRequest = async () => {
 export const addStockRequest = async (name, data) => {
   try {
     const response = await axios.put(`${suppliesAPI}/add-stock/${name}`, data, { withCredentials: true })
-    return response.data
+    return response
   } catch (error) {
-    return error.response ? error.response.data : { msg: 'Something went wrong' }
+    return error ? error.response : { msg: 'Something went wrong' }
   }
 }
 export const newSupplyRequest = async (data) => {
@@ -177,18 +177,18 @@ export const newSupplyRequest = async (data) => {
 export const assignSuppliesRequest = async (room, data) => {
   try {
     const response = await axios.post(`${suppliesAPI}/assign/${room}`, data, { withCredentials: true })
-    return response.data
+    return response
   } catch (error) {
-    return error.response ? error.response.data : { msg: 'Something went wrong' };
+    return error ? error.response : { msg: 'Something went wrong' };
   }
 }
 
 export const deleteSupplyRequest = async (id) => {
   try {
     const response = await axios.delete(`${suppliesAPI}/${id}`, { withCredentials: true })
-    return response.data
+    return response
   } catch (error) {
-    return error.response ? error.response.data : { msg: 'Something went wrong' }
+    return error.response ? error.response : { msg: 'Something went wrong' }
   }
 }
 
