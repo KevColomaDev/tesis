@@ -34,6 +34,25 @@ export const createSupply = async (req, res) => {
       return res.status(400).json({ msg: 'Item already exists.' })
     }
     await collectionSuplies.insertOne(itemInput)
+    if (itemInput.quantity > 0) {
+      const todayDate = new Date().toLocaleDateString('es-ES')
+      const reports = await reportsSupplies.getReportsbyNameAndDay(itemInput.name, todayDate)
+      if (reports) {
+        const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
+          { name: itemInput.name, date: todayDate },
+          { $set: { quantity: reports.quantity + itemInput.quantity } },
+          { returnDocument: 'after' }
+        )
+        console.log(updatedReport)
+      } else {
+        const newReport = {
+          name: itemInput.name,
+          quantity: itemInput.quantity,
+          date: new Date().toLocaleDateString('es-ES')
+        }
+        await collectionReportsSupplies.insertOne(newReport)
+      }
+    }
     return res.status(200).json(itemInput)
   } catch (error) {
     console.log(error)
@@ -48,11 +67,11 @@ export const deleteSupply = async (req, res) => {
     if (quantity === 0) {
       const deletedSupply = await collectionSuplies.findOneAndDelete({ _id: new mongoose.Types.ObjectId(id) })
       if (!deletedSupply) {
-        return res.status(400).json({ msg: 'Item doesnt exists.' })
+        return res.status(400).json({ msg: 'El suministro selecionado no existe.' })
       }
-      return res.status(200).json({ msg: 'Item deleted successfully.' })
+      return res.status(200).json({ msg: 'Suministro eliminado correctamente.' })
     } else {
-      return res.status(400).json({ msg: 'There is still stock.' })
+      return res.status(400).json({ msg: 'Todavia quedan existencias de este suministro.' })
     }
   } catch (error) {
     console.log(error)
@@ -67,7 +86,7 @@ export const addStock = async (req, res) => {
       return res.status(400).json({ errors: suppliesInput.issues })
     }
     if (suppliesInput.quantity === 0) {
-      return res.status(200).json({ msg: 'No quantity registered' })
+      return res.status(400).json({ msg: 'La cantidad debe ser mayor a cero' })
     }
     const { name: nameInput } = req.params
     const { quantity } = await collectionSuplies.findOne({ name: nameInput })
@@ -77,9 +96,9 @@ export const addStock = async (req, res) => {
       { returnDocument: 'after' }
     )
     if (!updateSupplies) {
-      return res.status(404).json({ msg: 'Supply not found' })
+      return res.status(404).json({ msg: 'Suministro no encontrado' })
     }
-    const todayDate = new Date().toLocaleDateString()
+    const todayDate = new Date().toLocaleDateString('es-ES')
     const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, todayDate)
     if (reports) {
       const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
@@ -92,11 +111,11 @@ export const addStock = async (req, res) => {
       const newReport = {
         name: nameInput,
         quantity: suppliesInput.quantity,
-        date: new Date().toLocaleDateString()
+        date: new Date().toLocaleDateString('es-ES')
       }
       await collectionReportsSupplies.insertOne(newReport)
     }
-    return res.status(200).json({ msg: 'Supplies registered', updateSupplies })
+    return res.status(200).json({ msg: 'Suministros registrados exitosamente.', updateSupplies })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Internal Server Error' })
@@ -111,7 +130,7 @@ export const assignSupplies = async (req, res) => {
       return res.status(400).json({ errors: assignInput.issues })
     }
     if (assignInput.supplies.length < 1) {
-      return res.status(400).json({ msg: 'Supplies not found.' })
+      return res.status(400).json({ msg: 'Suministros no encontrados.' })
     }
     const updatedSupplies = []
     // Check if existences exists
@@ -119,7 +138,7 @@ export const assignSupplies = async (req, res) => {
       try {
         const { quantity } = await collectionSuplies.findOne({ name: assignInput.supplies[i].name })
         if (quantity < assignInput.supplies[i].quantity) {
-          return res.status(400).json({ msg: 'Not enough existencies.' })
+          return res.status(400).json({ msg: 'No hay suficientes existencias.' })
         } else {
           const updatedSupply = await collectionSuplies.findOneAndUpdate(
             { name: assignInput.supplies[i].name },
@@ -133,17 +152,17 @@ export const assignSupplies = async (req, res) => {
         }
       } catch (error) {
         console.log(error)
-        return res.status(400).json({ msg: 'Supply or supplies doesnt exist.' })
+        return res.status(400).json({ msg: 'No existe ese suministro creado.' })
       }
     }
     // Make report
     const report = {
       room: numberRoom,
       assignedSupplies: assignInput.supplies,
-      assignDate: new Date().toLocaleDateString()
+      assignDate: new Date().toLocaleDateString('es-ES')
     }
     await collectionReportsRoomSupplies.insertOne(report)
-    return res.status(200).json(report)
+    return res.status(200).json({ msg: 'Los suministros han sido asignados correctamente.' })
   } catch (error) {
     console.log(error)
   }
