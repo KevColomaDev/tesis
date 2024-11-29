@@ -5,6 +5,7 @@ import { beneficiaries } from '../models/beneficiaries.js'
 import { collectionReportDonations, reportDonations } from '../models/reportsDonations.js'
 import { validateAssignDonations } from '../schemas/assignDonations.js'
 import { sendMailToBeneficiary } from '../config/nodemailer.js'
+import { validateBeneficiary } from '../schemas/createBeneficiary.js'
 
 export const getCampaigns = async (req, res) => {
   try {
@@ -55,11 +56,11 @@ export const createCampaign = async (req, res) => {
     }
     // Verify if name field is empty
     if (Object.values(campaignInput)[0] === '') {
-      return res.status(400).json({ msg: 'Complete the name field.' })
+      return res.status(400).json({ msg: 'Completa el campo nombre.' })
     }
     const items = campaignInput.items
     if (items.length === 0) {
-      return res.status(400).json({ msg: 'At least you need an item.' })
+      return res.status(400).json({ msg: 'Necesitas añadir al menos un item.' })
     }
     items.forEach(async item => {
       const donationExist = await collectionDonations.findOne({ name: item.name })
@@ -119,7 +120,11 @@ export const createBeneficiary = async (req, res) => {
     if (existingBeneficiary) {
       return res.status(400).json({ msg: 'El beneficiario ya existe' })
     }
-
+    const inputBeneficiary = validateBeneficiary(req.body)
+    console.log(inputBeneficiary)
+    if (Object.keys(inputBeneficiary).includes('issues')) {
+      return res.status(400).json({ errors: inputBeneficiary.issues })
+    }
     const newBeneficiary = await beneficiaries.createBeneficiary({ cedula, nombre, apellido, email, telefono })
     return res.status(201).json({ msg: 'Beneficiario creado exitosamente', beneficiary: newBeneficiary })
   } catch (error) {
@@ -166,18 +171,18 @@ export const assignBeneficiary = async (req, res) => {
     }
     const beneficiary = await beneficiaries.verifyBeneficiaryByCedula(donationsInput.ci)
     if (!beneficiary) {
-      return res.status(400).json({ msg: 'Beneficiary does not exist' })
+      return res.status(400).json({ msg: 'Beneficiario no existente.' })
     }
     const updatedDonations = []
     if (donationsInput.items.length < 1) {
-      return res.status(400).json({ msg: 'No items found' })
+      return res.status(400).json({ msg: 'No se han seleccionado items.' })
     }
     // Check if existences exists
     for (let i = 0; i < donationsInput.items.length; i++) {
       try {
         const { quantity } = await collectionDonations.findOne({ name: donationsInput.items[i].name })
         if (quantity < donationsInput.items[i].quantity) {
-          return res.status(400).json({ msg: 'Not enough existencies.' })
+          return res.status(400).json({ msg: 'No hay suficientes existencias.' })
         } else {
           const updatedDonation = await collectionDonations.findOneAndUpdate(
             { name: donationsInput.items[i].name },
@@ -187,7 +192,7 @@ export const assignBeneficiary = async (req, res) => {
         }
       } catch (error) {
         console.log(error)
-        return res.status(400).json({ msg: 'Donation(s) do(es) not exists.' })
+        return res.status(400).json({ msg: 'La donacion o las donaciones no existen.' })
       }
     }
     sendMailToBeneficiary(beneficiary.email, donationsInput.items)
@@ -211,7 +216,7 @@ export const getReports = async (req, res) => {
     const endDate = req.body.fechaFinal
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ msg: 'Start date and end date are required' })
+      return res.status(400).json({ msg: 'La fecha inicial y la fecha final son requeridas.' })
     }
 
     // Convertir las fechas a objetos Date
@@ -239,7 +244,7 @@ export const getCampaignsReports = async (req, res) => {
     const endDate = req.body.fechaFinal
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ msg: 'Start date and end date are required' })
+      return res.status(400).json({ msg: 'La fecha inicial y la fecha final son requeridas.' })
     }
 
     // Convertir las fechas a objetos Date
@@ -257,6 +262,6 @@ export const getCampaignsReports = async (req, res) => {
     return res.status(200).json(reports)
   } catch (error) {
     console.log(error)
-    return res.status(500).json({ msg: 'Error retrieving reports' })
+    return res.status(500).json({ msg: 'Ha ocurrido un error obteniendo los reportes.' })
   }
 }

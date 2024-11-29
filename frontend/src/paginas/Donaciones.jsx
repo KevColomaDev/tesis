@@ -42,7 +42,8 @@ const Donaciones = () => {
 
     const handleAddDonationItem = () => {
         if (donationItemName === 'default') {
-            alert("Selecciona un item!")
+            setMessage({ type: 'Error: ', message: 'Debes seleccionar un item para agregarlo a la lista.' })
+            setTimeout(() => setMessage({}), 3000)
         }else{
             if (donationItemQuantity > 0 && donationItemQuantity < 100) {
                 // Agregar artículo a la lista de donaciones
@@ -51,7 +52,8 @@ const Donaciones = () => {
                 setDonationItemQuantity(0);
                 setDonationItemName("default");  // Limpiar campo de nombre del artículo
             } else {
-                alert("Cantidad no válida, debe ser entre 1 y 99.");
+                setMessage({ type: 'Error: ', message: 'Cantidad no válida, debe ser entre 1 y 99.' })
+                setTimeout(() => setMessage({}), 3000)
             }
         }
     };
@@ -113,10 +115,14 @@ const Donaciones = () => {
                 setIsVerified(true);
                 setIsCedulaNotFound(false);
             } else {
+                setNombre('')
+                setApellido('')
+                setEmail('')
+                setTelefono('')
                 setBeneficiaryData(null);
                 setIsVerified(false);
-                setIsCedulaNotFound(true);  
-                console.log("Cédula no válida");
+                setIsCedulaNotFound(true);
+                
             }
         } catch (error) {
             console.error("Error al verificar la cédula:", error);
@@ -138,14 +144,21 @@ const Donaciones = () => {
         };
       
         try {
-          const result = await createBeneficiaryRequest(beneficiaryData);
-      
-          if (result) {
-            setMessage({});
+          const response = await createBeneficiaryRequest(beneficiaryData);
+          console.log(response)
+          if (response.status === 201) {
             await donationsData()
-            alert("Beneficiario creado exitosamente");
+            setMessage({ type: '', message: response.data.msg })
+            setTimeout(() => setMessage({}), 3000)
+            setNombre('')
+            setApellido('')
+            setEmail('')
+            setTelefono('')
+            setIsVerified(true);
+            setIsCedulaNotFound(false);
           } else {
-            setMessage({ type: 'Error: ', message: 'Hubo un error al crear el beneficiario' });
+            setMessage({ type: 'Error: ', message: response.data.msg || response.data.errors[0].message});
+            setTimeout(() => setMessage({}), 3000)
           }
         } catch (error) {
           console.error('Error al crear el beneficiario:', error);
@@ -165,17 +178,20 @@ const handleUpdateBeneficiary = async () => {
             };
             
             const response = await updateBeneficiaryRequest(updatedData);
-            if (response) {
-                setMessage({});
+            if (response.status === 200) {
                 await donationsData()
-                alert("Beneficiario actualizado exitosamente");
-
+                setMessage({ type: '', message: 'Beneficiario actualizado exitosamente.' })
+                setTimeout(() => setMessage({}), 3000)
+                setBeneficiaryData(null);
+                setIsVerified(false);
+                setIsCedulaNotFound(true);
             } else {
-                setMessage({ type: 'Error: ', message: 'Hubo un error al actualizar el beneficiario' });
+                setMessage({ type: 'Error: ', message: 'Hubo un error al actualizar el beneficiarioasd' });
             }
         } catch (error) {
             console.error("Error al actualizar el beneficiario:", error);
-            alert("Hubo un error al actualizar el beneficiario");
+            setMessage({ type: 'Error: ', message: error.msg })
+            setTimeout(() => setMessage({}), 3000)
         }
     };
 
@@ -242,17 +258,22 @@ const handleUpdateBeneficiary = async () => {
         }
         try {
             const response = await createCampaignRequest(form);
-            if (response.response.data[0].message === 'String must contain at least 1 character(s)') {
-                setMessage({ type: 'Error: ', message: 'La campaña debe tener un nombre' });
+            console.log(response)
+            if (response.status === 200){
+                setCampaignName('')
+                setItems([])
+                setItemQuantity(0)
+                await donationsData()
+                setMessage({ type: '', message: 'Campaña creada exitosamente.'});
+                setTimeout(() => setMessage({}), 3000)
+            }else {
+                setMessage({ type: 'Error: ', message: response.data[0]?.message || response.data.msg});
+                setTimeout(() => setMessage({}), 3000)
             }
         } catch (error) {
             console.log(error);
-            setMessage({});
-            setCampaignName('')
-            setItems([])
-            setItemQuantity(0)
-            await donationsData()
-            return alert('Campaña creada exitosamente')
+            setMessage({ type: 'Error: ', message: 'Ha ocurrido un error interno.' });
+            setTimeout(() => setMessage({}), 3000)
         }
     }
 
@@ -264,21 +285,15 @@ const handleUpdateBeneficiary = async () => {
             }
             const response = await assignDonationsRequest(form)
             console.log('respuesta', response);
-            if (response.msg === 'Beneficiary does not exist') {
-                setMessage({ type: 'Error: ', message: 'El beneficiario no existe' });
-            }
-            if (response.msg === 'No items found') {
-                setMessage({ type: 'Error: ', message: 'No se asignaron items' });
-            }
-            if (response.ci) {
+            if (response.status === 200) {
                 setDonationCedula('')
                 setDonationItems([])
-                alert('Donaciones asignadas exitosamente')
-                setMessage({})
+                setMessage({ type: '', message: 'Donaciones asignadas exitosamente.' });
+                setTimeout(()=> setMessage({}), 3000)
                 await donationsData()
-            }
-            if(response.errors[0].message === 'CI must be exactly 10 digits'){
-                setMessage({ type: 'Error: ', message: 'CI debe tener exactamente 10 digitos' });
+            } else {
+                setMessage({ type: 'Error: ', message: response.data.errors ? response.data.errors[0].message : response.data.msg});
+                setTimeout(()=> setMessage({}), 3000)
             }
         } catch (error) {
             console.log(error);
