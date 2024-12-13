@@ -10,7 +10,7 @@ export const app = e()
 
 const allowedOrigins = [
   'http://localhost:5173', // Development
-  'https://centrodehospitalidad.netlify.app/'
+  'https://centrodehospitalidad.netlify.app'
 ]
 
 // Middlewares
