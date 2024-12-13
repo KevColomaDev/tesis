@@ -165,7 +165,6 @@ export const updateBeneficiary = async (req, res) => {
 export const assignBeneficiary = async (req, res) => {
   try {
     const donationsInput = validateAssignDonations(req.body)
-    console.log(donationsInput)
     if (Object.keys(donationsInput).includes('issues')) {
       return res.status(400).json({ errors: donationsInput.issues })
     }

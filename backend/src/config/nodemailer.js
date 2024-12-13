@@ -88,20 +88,28 @@ export const sendMailToSocialWorker = (userMail, password, token) => {
   })
 }
 
-export const sendMailToBeneficiary = (userMail, donationItem, token) => {
+export const sendMailToBeneficiary = (userMail, donationItems, token) => {
+  const donationDetails = donationItems
+    .map(item => `<p> - ${item.name} (${item.quantity})</p>`)
+    .join('')
+
   const mailOptions = {
     from: process.env.USER_MAILTRAP,
     to: userMail,
     subject: '¡Felicitaciones!',
-    html: `<p>Ha sido regristrado para poder recibir donaciones</p>
-    <br>
-    <p style="font-weight: bold;">Los detalles de la donacion son los siguientes:</p>
-    <p>Donacion: ${donationItem}</p>
-    <p>Esperamos que te recuperes lo mas pronto posible</p>`
+    html: `
+      <p>Ha sido registrado para poder recibir donaciones</p>
+      <br>
+      <p style="font-weight: bold;">Los detalles de la donación son los siguientes:</p>
+      <p>Donación/es:</p>
+      ${donationDetails}
+      <p>Esperamos que te recuperes lo más pronto posible</p>
+    `
   }
+
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.log(error)
+      console.error('Error al enviar el correo:', error)
     } else {
       console.log('Correo de registro exitoso enviado: ' + info.response)
     }
