@@ -10,9 +10,7 @@ export const app = e()
 
 const allowedOrigins = [
   'http://localhost:5173', // Development
-  'https://examen-full-stack-frontend.vercel.app', // Production
-  'https://centro-de-hospitalidad-solca.vercel.app',
-  'https://comite-solca.netlify.app'
+  'https://centrodehospitalidad.netlify.app/'
 ]
 
 // Middlewares
