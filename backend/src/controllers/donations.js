@@ -201,7 +201,7 @@ export const assignBeneficiary = async (req, res) => {
       name: beneficiary.nombre,
       lastname: beneficiary.apellido,
       assignedDonations: donationsInput.items,
-      assignDate: new Date().toLocaleDateString()
+      assignDate: new Date().toLocaleDateString('es-ES')
     }
     await collectionReportDonations.insertOne(report)
     return res.status(200).json(report)

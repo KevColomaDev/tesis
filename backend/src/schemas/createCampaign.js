@@ -14,7 +14,7 @@ const campaignSchema = z.object({
         .max(99, { message: 'La cantidad no puede ser mayor a 99.' })
     })
   ),
-  donationDate: z.string().default(new Date().toLocaleDateString())
+  donationDate: z.string().default(new Date().toLocaleDateString('es-ES'))
 })
 
 export const validateCampaign = (data) => {
