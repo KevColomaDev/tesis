@@ -334,59 +334,79 @@ const handleUpdateBeneficiary = async () => {
             </div>
     
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center"> {/* Ajuste a 3 columnas en pantallas grandes */}
-                <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
+                <div className="bg-gray-200 p-4 sm:p-6 rounded-lg shadow-md w-full max-w-md mx-auto">
                     <h3 className="text-lg font-semibold mb-4 text-center">Agregar campaña</h3>
                     <div className="space-y-4 w-full">
-                        <label className="flex justify-between items-center">
-                            <input onChange={handleCampaignName} value={campaignName} type="text" placeholder="Nombre de la Campaña" className="w-full ml-1 p-1 border rounded-md" />
+                        <label className="flex flex-col sm:flex-row justify-between items-center">
+                            <input
+                                onChange={handleCampaignName}
+                                value={campaignName}
+                                type="text"
+                                placeholder="Nombre de la Campaña"
+                                className="w-full sm:ml-1 p-2 border rounded-md"
+                            />
                         </label>
                         {items.map((item, index) => (
-                            <div key={index} className='flex justify-between items-center'>
-                                <div className='w-24 p-2 border rounded-md'>{item.name}</div>
-                                <div className='w-24 p-2 border rounded-md'>{item.quantity}</div>
-                                <button 
-                                    onClick={() => handleRemoveItem(index)} 
-                                    className="w-8 h-8 bg-red-500 text-white font-bold rounded-md hover:bg-red-700 flex items-center justify-center text-xl"
-                                    style={{ marginLeft: '10px' }}
+                            <div key={index} className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+                                <div className="w-full sm:w-24 p-2 border rounded-md text-center">{item.name}</div>
+                                <div className="w-full sm:w-24 p-2 border rounded-md text-center">{item.quantity}</div>
+                                <button
+                                    onClick={() => handleRemoveItem(index)}
+                                    className="w-8 h-8 bg-red-500 text-white font-bold rounded-md hover:bg-red-700 flex items-center justify-center text-xl mt-2 sm:mt-0 sm:ml-2"
                                 >
                                     -
                                 </button>
                             </div>
                         ))}
-                        <label className="flex justify-between items-center">
-                            <select onChange={handleChange} name="item" className='w-40 p-2 border rounded-md'>
-                                {donations.map(donation => (
-                                    <option key={donation[1]._id} value={donation[1].name}>{donation[1].name}</option>
+                        <label className="flex flex-col sm:flex-row justify-between items-center">
+                            <select
+                                onChange={handleChange}
+                                name="item"
+                                className="w-full sm:w-40 p-2 border rounded-md"
+                            >
+                                {donations.map((donation) => (
+                                    <option key={donation[1]._id} value={donation[1].name}>
+                                        {donation[1].name}
+                                    </option>
                                 ))}
                                 <option value="Otro">Ingresar Otro</option>
                             </select>
-                            <input 
-                                name="quantity" 
-                                value={itemQuantity} 
-                                onChange={handleChangeQuantity} 
-                                type="number" 
-                                max="99" 
-                                min="0" 
-                                step={selectedItem === "Dinero" ? "0.01" : "1"} 
-                                className={`w-24 p-2 border rounded-md ${!validInput ? 'border-red-500' : ''}`} 
-                                placeholder="Cantidad" 
+                            <input
+                                name="quantity"
+                                value={itemQuantity}
+                                onChange={handleChangeQuantity}
+                                type="number"
+                                max="99"
+                                min="0"
+                                step={selectedItem === "Dinero" ? "0.01" : "1"}
+                                className={`w-full sm:w-24 p-2 border rounded-md mt-2 sm:mt-0 ${
+                                    !validInput ? "border-red-500" : ""
+                                }`}
+                                placeholder="Cantidad"
                             />
-                            {!isOtherItem && 
-                                <button onClick={handleClickItem} className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950">+</button>
-                            }
+                            {!isOtherItem && (
+                                <button
+                                    onClick={handleClickItem}
+                                    className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950 mt-2 sm:mt-0"
+                                >
+                                    +
+                                </button>
+                            )}
                         </label>
                         {isOtherItem && (
-                            <label className="flex justify-between">
-                                <input 
-                                    type="text" 
-                                    onChange={handleChangeNewItemName} 
-                                    value={newItemName} 
-                                    className={`w-full mr-2 p-2 border rounded-md ${!validInputName ? 'border-red-500' : ''}`} 
+                            <label className="flex flex-col sm:flex-row justify-between items-center max-w-lg mx-auto">
+                                <input
+                                    type="text"
+                                    onChange={handleChangeNewItemName}
+                                    value={newItemName}
+                                    className={`w-full sm:mr-2 p-2 border rounded-md ${
+                                        !validInputName ? "border-red-500" : ""
+                                    }`}
                                     placeholder="Nombre del nuevo item"
                                 />
-                                <button 
-                                    onClick={handleClickNewItem} 
-                                    className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950"
+                                <button
+                                    onClick={handleClickNewItem}
+                                    className="px-4 py-2 bg-sky-800 text-white font-bold rounded-md hover:bg-sky-950 mt-2 sm:mt-0"
                                 >
                                     +
                                 </button>
@@ -395,13 +415,14 @@ const handleUpdateBeneficiary = async () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleSubmit}
-                                className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                className="px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950 w-full sm:w-auto"
                             >
                                 Registrar Campaña
                             </button>
                         </div>
                     </div>
                 </div>
+
     
                 <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
                     <h3 className="text-lg font-semibold mb-4 text-center">Beneficiarios</h3>
@@ -418,12 +439,13 @@ const handleUpdateBeneficiary = async () => {
                                 <button
                                     type="button"
                                     onClick={handleCedulaSubmit}
-                                    className="w-1/4 ml-2 px-4 py-1 bg-sky-800 text-white rounded-md hover:bg-sky-950"
+                                    className="w-1/4 ml-2 px-2 py-1 bg-sky-800 text-white rounded-md hover:bg-sky-950 text-sm text-center truncate"
                                 >
                                     Verificar
                                 </button>
                             </div>
                         </label>
+
     
                         {isVerified && (
                             <div className="mt-4 space-y-2">
@@ -524,23 +546,23 @@ const handleUpdateBeneficiary = async () => {
                     </form>
                 </div>
     
-                <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-md">
+                <div className="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-lg mx-auto">
                     <h3 className="text-lg font-semibold mb-4 text-center">Donaciones</h3>
                     <div className="space-y-7 w-full">
                         {/* Campo para cédula */}
-                        <label className="flex justify-between items-center">
+                        <label className="flex flex-col sm:flex-row justify-between items-center">
                             <input
                                 type="text"
                                 value={donationCedula}
                                 onChange={(e) => setDonationCedula(e.target.value)}
-                                className="w-full p-1 border rounded-md"
+                                className="w-full sm:w-3/4 p-1 border rounded-md mb-4 sm:mb-0"
                                 placeholder="Ingrese la cédula"
                             />
                         </label>
 
                         {/* Selección de objetos */}
-                        <label className="flex justify-between items-center">
-                            <select onChange={(e) => setDonationItemName(e.target.value)} value={donationItemName} className="w-40 p-2 border rounded-md">
+                        <label className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                            <select onChange={(e) => setDonationItemName(e.target.value)} value={donationItemName} className="w-full sm:w-40 p-2 border rounded-md">
                                 <option defaultChecked value={"default"}>Selecciona un item</option>
                                 {donations.map(donation => (
                                     <option key={donation[1]._id} value={donation[1].name}>{donation[1].name}</option>
@@ -552,13 +574,13 @@ const handleUpdateBeneficiary = async () => {
                                 type="number"
                                 min="1"
                                 max="99"
-                                className="w-24 p-2 border rounded-md"
+                                className="w-full sm:w-24 p-2 border rounded-md"
                                 placeholder="Cantidad"
                             />
                             <button
                                 type="button"
                                 onClick={handleAddDonationItem}
-                                className="px-4 py-2 bg-sky-800 text-white  rounded-md hover:bg-sky-950"
+                                className="w-full sm:w-auto px-4 py-2 bg-sky-800 text-white rounded-md hover:bg-sky-950"
                             >
                                 Agregar
                             </button>
@@ -566,12 +588,12 @@ const handleUpdateBeneficiary = async () => {
 
                         {/* Mostrar los artículos agregados */}
                         {donationItems.map((item, index) => (
-                            <div key={index} className="flex justify-between items-center space-x-4">
+                            <div key={index} className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 sm:space-x-4">
                                 <span>{item.name}</span> <span>{item.quantity}</span>
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveDonationItem(index)}
-                                    className="px-4 py-2 bg-red-600 text-white  rounded-md hover:bg-red-700"
+                                    className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                                 >
                                     Eliminar
                                 </button>
@@ -589,6 +611,7 @@ const handleUpdateBeneficiary = async () => {
                         </div>
                     </div>
                 </div>
+
             </div>
     
             {showReport && <ReporteDonaciones toggleReport={toggleReport} />}
