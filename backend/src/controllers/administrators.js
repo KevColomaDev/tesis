@@ -136,40 +136,36 @@ export const registerPatient = async (req, res) => {
 
 export const registerInRoom = async (req, res) => {
   const validateDate = (date) => {
-    let regex = /^\d{1}\/\d{1}\/\d{4}$/
-    if (regex.test(date)) {
-      return date
-    } else {
-      regex = /^\d{2}\/\d{2}\/\d{4}$/
-      if (regex.test(date)) {
-        return date
-      }
-    }
+    const regex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/\d{4}$/
+    return regex.test(date) ? date : null
   }
+
   try {
     const patient = validateRegisterInRoom(req.body)
     console.log(patient)
+
     if (!patient.h_number || !patient.name) {
       return res.status(401).json({ msg: 'Neccesary name and room' })
     }
+
     const validAdmissionDate = validateDate(patient.admissionDate)
     if (!validAdmissionDate) {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
+
     const currentDate = new Date()
     const currentAdmissionDate = currentDate.toLocaleDateString('es-ES')
     console.log(currentAdmissionDate)
-    const currentTime = currentDate.toLocaleTimeString()
-    console.log(currentTime)
-    console.log(typeof (currentAdmissionDate), typeof (patient.admissionDate))
-    console.log(`${patient.admissionDate}`)
+
     if (currentAdmissionDate !== patient.admissionDate) {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
+
     await administrators.registerInRoom(patient)
     return res.status(200).json({ msg: 'Patient registered' })
   } catch (error) {
     console.log(error)
+    return res.status(500).json({ msg: 'Internal server error' })
   }
 }
 

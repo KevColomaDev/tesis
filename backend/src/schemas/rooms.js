@@ -6,7 +6,7 @@ const roomSchema = z.object({
   name: z.string().default('---'),
   condition: z.string().default('---'),
   food: z.string().default('---'),
-  admissionDate: z.string().default(new Date().toLocaleDateString()),
+  admissionDate: z.string().default(new Date().toLocaleDateString('es-ES')),
   admissionTime: z.string().default('--:--'),
   departureDate: z.string().optional().default('--/--/--'),
   departureTime: z.string().optional().default('--:--'),
