@@ -140,6 +140,11 @@ export const registerInRoom = async (req, res) => {
     return regex.test(date) ? date : null
   }
 
+  const normalizeDate = (date) => {
+    const [day, month, year] = date.split('/').map((part) => part.padStart(2, '0'))
+    return `${day}/${month}/${year}`
+  }
+
   try {
     const patient = validateRegisterInRoom(req.body)
     console.log(patient)
@@ -154,10 +159,12 @@ export const registerInRoom = async (req, res) => {
     }
 
     const currentDate = new Date()
-    const currentAdmissionDate = currentDate.toLocaleDateString('es-ES')
+    const currentAdmissionDate = normalizeDate(currentDate.toLocaleDateString('es-ES'))
+    const patientAdmissionDate = normalizeDate(patient.admissionDate)
+
     console.log(currentAdmissionDate)
 
-    if (currentAdmissionDate !== patient.admissionDate) {
+    if (currentAdmissionDate !== patientAdmissionDate) {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
 
