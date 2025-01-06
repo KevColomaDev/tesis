@@ -206,8 +206,8 @@ export const getRoomsReports = async (req, res) => {
     const end = new Date(endDate)
 
     // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+    const formattedStartDate = `${String(start.getDate())}/${String(start.getMonth() + 1)}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate())}/${String(end.getMonth() + 1)}/${end.getFullYear()}`
 
     console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
 
