@@ -177,12 +177,12 @@ export const getReports = async (req, res) => {
     }
 
     // Convertir las fechas a objetos Date
-    const start = new Date(startDate).toLocaleDateString('es-ES')
-    const end = new Date(endDate).toLocaleDateString('es-ES')
+    const start = new Date(startDate)
+    const end = new Date(endDate)
 
-    // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+    // Formatear las fechas en el formato MM/DD/YYYY
+    const formattedStartDate = `${String(start.getMonth() + 1).padStart(2, '0')}/${String(start.getDate()).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getMonth() + 1).padStart(2, '0')}/${String(end.getDate()).padStart(2, '0')}/${end.getFullYear()}`
 
     console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
 
