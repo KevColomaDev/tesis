@@ -32,6 +32,7 @@ export const reportsSupplies = {
   },
   async getReports (initialDate, finalDate) {
     try {
+      console.log(initialDate + '--' + finalDate)
       const reportsData = await collectionReportsSupplies.find({ date: { $gte: initialDate, $lte: finalDate } }).toArray()
       const reportsDataTry = await collectionReportsSupplies.find({ date: { $gte: '4/1/2025', $lte: '6/1/2025' } }).toArray()
       console.log(reportsDataTry)
