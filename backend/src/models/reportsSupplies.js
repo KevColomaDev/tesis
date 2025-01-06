@@ -33,6 +33,7 @@ export const reportsSupplies = {
   async getReports (initialDate, finalDate) {
     try {
       const reportsData = await collectionReportsSupplies.find({ date: { $gte: initialDate, $lte: finalDate } }).toArray()
+      console.log(reportsData)
       return reportsData
     } catch (error) {
       console.log(error)
