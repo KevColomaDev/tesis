@@ -32,6 +32,7 @@ export default function Header() {
 
   const logoutClick = async () =>{
     const response = await logoutRequest();
+    window.location.reload()
     console.log(response)
   }
   useEffect(() => {
@@ -157,16 +158,15 @@ export default function Header() {
                       Actualizar Contraseña
                     </Link>
                     }
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200"
+                    <button
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-200 w-full text-start"
                       role="menuitem"
                       tabIndex="-1"
                       id="user-menu-item-2"
                       onClick={()=>logoutClick()}
                     >
                       Salir
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -264,13 +264,12 @@ export default function Header() {
                 >
                   Opciones del administrador
                 </Link>}
-                <Link
-                  to="/login"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                <button
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white w-full text-start"
                   onClick={()=>logoutClick()}
                 >
                   Salir
-                </Link>
+                </button>
               </div>
             </div>
           </div>
