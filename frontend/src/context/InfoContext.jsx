@@ -33,6 +33,7 @@ const InfoProvider = ({ children }) => {
     <InfoContext.Provider
       value={{
         availableRooms,
+        setAvailableRooms,
         normalDiet,
         blandDiet,
         liquidDiet,
