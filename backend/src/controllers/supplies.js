@@ -35,14 +35,11 @@ export const createSupply = async (req, res) => {
     }
     await collectionSuplies.insertOne(itemInput)
     if (itemInput.quantity > 0) {
-      const date = new Date()
-      const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      const formattedDate = formatter.format(date)
-      console.log(formattedDate)
-      const reports = await reportsSupplies.getReportsbyNameAndDay(itemInput.name, formattedDate)
+      const todayDate = new Date()
+      const reports = await reportsSupplies.getReportsbyNameAndDay(itemInput.name, todayDate)
       if (reports) {
         const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
-          { name: itemInput.name, date: formattedDate },
+          { name: itemInput.name, date: todayDate },
           { $set: { quantity: reports.quantity + itemInput.quantity } },
           { returnDocument: 'after' }
         )
@@ -51,7 +48,7 @@ export const createSupply = async (req, res) => {
         const newReport = {
           name: itemInput.name,
           quantity: itemInput.quantity,
-          date: formattedDate
+          date: todayDate
         }
         await collectionReportsSupplies.insertOne(newReport)
       }
@@ -101,14 +98,11 @@ export const addStock = async (req, res) => {
     if (!updateSupplies) {
       return res.status(404).json({ msg: 'Suministro no encontrado' })
     }
-    const date = new Date()
-    const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    const formattedDate = formatter.format(date)
-    console.log(formattedDate)
-    const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, formattedDate)
+    const todayDate = new Date()
+    const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, todayDate)
     if (reports) {
       const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
-        { name: nameInput, date: formattedDate },
+        { name: nameInput, date: todayDate },
         { $set: { quantity: reports.quantity + suppliesInput.quantity } },
         { returnDocument: 'after' }
       )
@@ -117,7 +111,7 @@ export const addStock = async (req, res) => {
       const newReport = {
         name: nameInput,
         quantity: suppliesInput.quantity,
-        date: formattedDate
+        date: todayDate
       }
       await collectionReportsSupplies.insertOne(newReport)
     }
@@ -162,14 +156,11 @@ export const assignSupplies = async (req, res) => {
       }
     }
     // Make report
-    const date = new Date()
-    const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    const formattedDate = formatter.format(date)
-    console.log(formattedDate)
+    const todayDate = new Date()
     const report = {
       room: numberRoom,
       assignedSupplies: assignInput.supplies,
-      assignDate: formattedDate
+      assignDate: todayDate
     }
     await collectionReportsRoomSupplies.insertOne(report)
     return res.status(200).json({ msg: 'Los suministros han sido asignados correctamente.' })
@@ -190,11 +181,7 @@ export const getReports = async (req, res) => {
     const start = new Date(startDate)
     const end = new Date(endDate)
 
-    // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
-
-    const reports = await reportsSupplies.getReports(formattedStartDate, formattedEndDate)
+    const reports = await reportsSupplies.getReports(start, end)
 
     return res.status(200).json(reports)
   } catch (error) {
@@ -215,13 +202,9 @@ export const getRoomsReports = async (req, res) => {
     const start = new Date(startDate)
     const end = new Date(endDate)
 
-    // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+    console.log(start, end) // Imprimir las fechas formateadas
 
-    console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
-
-    const reports = await reportsSupplies.getRoomsReports(formattedStartDate, formattedEndDate)
+    const reports = await reportsSupplies.getRoomsReports(start, end)
 
     return res.status(200).json(reports)
   } catch (error) {
