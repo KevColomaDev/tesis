@@ -35,11 +35,14 @@ export const createSupply = async (req, res) => {
     }
     await collectionSuplies.insertOne(itemInput)
     if (itemInput.quantity > 0) {
-      const todayDate = new Date().toLocaleDateString('es-ES')
-      const reports = await reportsSupplies.getReportsbyNameAndDay(itemInput.name, todayDate)
+      const date = new Date()
+      const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      const formattedDate = formatter.format(date)
+      console.log(formattedDate)
+      const reports = await reportsSupplies.getReportsbyNameAndDay(itemInput.name, formattedDate)
       if (reports) {
         const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
-          { name: itemInput.name, date: todayDate },
+          { name: itemInput.name, date: formattedDate },
           { $set: { quantity: reports.quantity + itemInput.quantity } },
           { returnDocument: 'after' }
         )
@@ -48,7 +51,7 @@ export const createSupply = async (req, res) => {
         const newReport = {
           name: itemInput.name,
           quantity: itemInput.quantity,
-          date: new Date().toLocaleDateString('es-ES')
+          date: formattedDate
         }
         await collectionReportsSupplies.insertOne(newReport)
       }
@@ -98,11 +101,14 @@ export const addStock = async (req, res) => {
     if (!updateSupplies) {
       return res.status(404).json({ msg: 'Suministro no encontrado' })
     }
-    const todayDate = new Date().toLocaleDateString('es-ES')
-    const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, todayDate)
+    const date = new Date()
+    const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const formattedDate = formatter.format(date)
+    console.log(formattedDate)
+    const reports = await reportsSupplies.getReportsbyNameAndDay(nameInput, formattedDate)
     if (reports) {
       const updatedReport = await collectionReportsSupplies.findOneAndUpdate(
-        { name: nameInput, date: todayDate },
+        { name: nameInput, date: formattedDate },
         { $set: { quantity: reports.quantity + suppliesInput.quantity } },
         { returnDocument: 'after' }
       )
@@ -111,7 +117,7 @@ export const addStock = async (req, res) => {
       const newReport = {
         name: nameInput,
         quantity: suppliesInput.quantity,
-        date: new Date().toLocaleDateString('es-ES')
+        date: formattedDate
       }
       await collectionReportsSupplies.insertOne(newReport)
     }
@@ -156,10 +162,14 @@ export const assignSupplies = async (req, res) => {
       }
     }
     // Make report
+    const date = new Date()
+    const formatter = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const formattedDate = formatter.format(date)
+    console.log(formattedDate)
     const report = {
       room: numberRoom,
       assignedSupplies: assignInput.supplies,
-      assignDate: new Date().toLocaleDateString('es-ES')
+      assignDate: formattedDate
     }
     await collectionReportsRoomSupplies.insertOne(report)
     return res.status(200).json({ msg: 'Los suministros han sido asignados correctamente.' })
@@ -181,8 +191,8 @@ export const getReports = async (req, res) => {
     const end = new Date(endDate)
 
     // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate())}/${String(start.getMonth() + 1)}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate())}/${String(end.getMonth() + 1)}/${end.getFullYear()}`
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
 
     const reports = await reportsSupplies.getReports(formattedStartDate, formattedEndDate)
 
@@ -206,8 +216,8 @@ export const getRoomsReports = async (req, res) => {
     const end = new Date(endDate)
 
     // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate())}/${String(start.getMonth() + 1)}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate())}/${String(end.getMonth() + 1)}/${end.getFullYear()}`
+    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
 
     console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
 
