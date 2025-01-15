@@ -32,48 +32,45 @@ export const ReporteSuministros = ({ toggleReport }) => {
       doc.text(`Reporte desde ${fechaInicialFormateada} hasta ${fechaFinalFormateada}`, 10, 10);
       
       currentYPosition = currentYPosition + 10
-      doc.text(`Suministros Ingresados al Hospital`, 10, currentYPosition - 5);
+      if (response.length > 0) {doc.text(`Suministros Ingresados al Hospital`, 10, currentYPosition - 5);}
       
       response.forEach((item) => {
-        // Ajustar título para cada habitación
+        const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+        const fechaIngresoFormateada = new Date(item.date).toLocaleDateString('es-ES', opcionesFecha);
+      
         doc.setFontSize(12);
         doc.text(`${item.name}`, 10, currentYPosition);
-        
-        // Configuración de la tabla
+      
         doc.autoTable({
-          startY: currentYPosition + 10, // Posicionar la tabla debajo del título
+          startY: currentYPosition + 10,
           head: [['Campo', 'Valor']],
           body: [
             ['Cantidad Ingresada', item.quantity],
-            ['Fecha de ingreso', item.date],
+            ['Fecha de ingreso', fechaIngresoFormateada],
           ],
           margin: { top: 20 },
         });
-        
-        // Actualizar la posición para la siguiente tabla, incluyendo espacio adicional
+      
         currentYPosition = doc.lastAutoTable.finalY + 15;
       });
       doc.setFontSize(15);
       
-      doc.text(`Suministros Asignados en cada Habitación`, 10, currentYPosition - 5);
+      if (roomResponse.length > 0) {doc.text(`Suministros Asignados en cada Habitación`, 10, currentYPosition - 5);}
       roomResponse.forEach((item) => {
-        // Ajustar título para cada habitación
+        const fechaAsignadaFormateada = new Date(item.assignDate).toLocaleDateString('es-ES', opcionesFecha);
+      
         doc.setFontSize(12);
         doc.text(`Habitacion ${item.room}`, 10, currentYPosition);
         doc.setFontSize(8);
-        doc.text(`(${item.assignDate})`, 10, currentYPosition + 8);
-        
-        doc.setFontSize(12);
-        // Configuración de la tabla
+        doc.text(`(${fechaAsignadaFormateada})`, 10, currentYPosition + 8);
+      
         doc.autoTable({
-          startY: currentYPosition + 10, // Posicionar la tabla debajo del título
+          startY: currentYPosition + 10,
           head: [['Suministros', 'Cantidad']],
           body: item.assignedSupplies.map(supply => [supply.name, supply.quantity]),
           margin: { top: 20 },
         });
-        
-  
-        // Actualizar la posición para la siguiente tabla, incluyendo espacio adicional
+      
         currentYPosition = doc.lastAutoTable.finalY + 15;
       });
   
