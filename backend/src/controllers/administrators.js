@@ -341,6 +341,15 @@ export const getRooms = async (req, res) => {
   }
 }
 
+export const getListRooms = async (req, res) => {
+  try {
+    const rooms = await manageRooms.getAllRooms()
+    return res.status(200).json(rooms)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 // Manage Patients
 
 export const createPatient = async (req, res) => {
