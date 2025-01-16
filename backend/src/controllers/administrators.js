@@ -270,7 +270,7 @@ export const dietData = async (req, res) => {
       if (room.food === 'Normal') {
         normalDiet += 1
       }
-      if (room.food === 'Liquida') {
+      if (room.food === 'Líquida') {
         liquidDiet += 1
       }
     }
