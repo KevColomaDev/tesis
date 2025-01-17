@@ -79,6 +79,7 @@ const Habitaciones = () => {
     }
 
     try {
+      console.log(availableRooms);
       await deleteRoomRequest(roomNumber);
 
       const updatedRooms = myTotalRooms.filter(room => room.h_number !== roomNumber);

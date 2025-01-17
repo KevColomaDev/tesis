@@ -8,6 +8,8 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
   const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm({ defaultValues: initialData });
   const { register: registerSearch, handleSubmit: handleSubmitSearch, formState: { errors: errorsSearch }} = useForm() 
   const [error, setError] = useState({});
+  const [flag, setFlag] = useState(true);
+
   const parseDate = (date) => {
     if (!date || date.includes('-')) return date
     const [day, month, year] = date.split('/')
@@ -34,18 +36,28 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
         admissionDate: data.admissionDate ? formatDate(data.admissionDate) : '',
         admissionTime: data.admissionTime ? transformTimetoString(data.admissionTime) : '',
       };
-      if (initialData.name !== '---') {
-        const response = await registerInRoomRequest(formData);
-        if (response.msg === 'Patient registered'){
-          onComplete(formData);
+
+      // console.log(initialData);
+      // const patient = await createPatientRequest(formData)
+      if (initialData.room === formData.h_number && flag) {
+        console.log('son iguales');
+        setFlag(false)
+        if (initialData.name !== '---') {
+          const response = await registerInRoomRequest(formData);
+          if (response.msg === 'Patient registered'){
+            onComplete(formData);
+          }
+          onClose();
+          return;
         }
-        onClose();
-        return;
+      } else { 
+        await createPatientRequest(formData)
+        setFlag(true)
       }
+
       const response = await registerInRoomRequest(formData);
       if (response.msg === 'Patient registered'){
         onComplete(formData);
-        await createPatientRequest(formData);
       }
       onClose();
     } catch (error) {
