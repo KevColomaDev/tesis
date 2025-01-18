@@ -56,7 +56,7 @@ export const ReporteDonaciones = ({ toggleReport }) => {
       });
       doc.setFontSize(15);
       
-      doc.text(`Donantes`, 10, currentYPosition - 5);
+      doc.text(`Campañas`, 10, currentYPosition - 5);
       campaignResponse.forEach((item) => {
         // Ajustar título para cada habitación
         doc.setFontSize(12);

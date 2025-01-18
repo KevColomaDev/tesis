@@ -21,17 +21,31 @@ const ShowCampaigns = ({ onClose }) => {
         <h2 className="text-xl font-semibold mb-4 text-center">
           Campañas registradas
         </h2>
-        <div className="flex w-full">
-          <p className="w-1/2 text-md font-semibold text-center">Nombre de la campaña</p>
-          <p className="w-1/2 text-md font-semibold text-center">Fecha de donación</p>
-        </div>
-        <div className="flex flex-col items-center">
-          {allCampaigns.map(campana => (
-            <div className="flex items-center w-full">
-              <p className="w-1/2 font-medium text-center" key={campana._id}>{campana.name}</p>
-              <p className="w-1/2 font-medium text-center" key={campana._id}>{campana.donationDate}</p>
-            </div>
-          ))}
+        <div className="overflow-y-auto max-h-96">
+          <table className="table-auto w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2 text-md font-semibold text-center">
+                  Nombre de la campaña
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-md font-semibold text-center">
+                  Fecha de donación
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {allCampaigns.map((campana) => (
+                <tr key={campana._id} className="hover:bg-gray-100">
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {campana.name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {campana.donationDate}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
         <div className="flex justify-center mt-4">
           <button
@@ -43,6 +57,7 @@ const ShowCampaigns = ({ onClose }) => {
         </div>
       </div>
     </div>
+
   );
 };
 
