@@ -195,7 +195,7 @@ export const setParamsinBlank = async (req, res) => {
     // Obtener la fecha y hora actuales
     const currentDate = new Date()
     const date = formatDate(currentDate)
-    const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })
+    const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone:'America/Guayaquil' })
 
     // Asignar la fecha y hora al objeto roomData
     roomData.departureDate = date
