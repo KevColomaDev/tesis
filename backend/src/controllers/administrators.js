@@ -442,14 +442,20 @@ export const getReports = async (req, res) => {
     if (!startDate || !endDate) {
       return res.status(400).json({ msg: 'Start date and end date are required' })
     }
+    
+    console.log(startDate, endDate) // Imprimir las fechas recibidas
 
     // Convertir las fechas a objetos Date
     const start = new Date(startDate)
     const end = new Date(endDate)
 
+    console.log(start, end) // Imprimir las fechas convertidas
+
+    console.log(start.getDate(), end.getDate('es-ES')) // Imprimir las fechas convertidas
+
     // Formatear las fechas en el formato DD/MM/YYYY
-    const formattedStartDate = `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
-    const formattedEndDate = `${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
+    const formattedStartDate = `${String(start.getUTCDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`
+    const formattedEndDate = `${String(end.getUTCDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`
 
     console.log(formattedEndDate, formattedStartDate) // Imprimir las fechas formateadas
 
