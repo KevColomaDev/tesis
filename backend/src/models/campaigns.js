@@ -14,12 +14,9 @@ export const campaigns = {
 
  // CORREGIDO PARA MOSTRAR CAMPA;AS -----------------------------------
 
-  async getCampaigns (date) {
+  async getCampaigns () {
     try {
-      const query = { donationDate: date }
-      console.log('Consulta para MongoDB:', query)
-
-      const campaigns = await collectionCampaigns.find(query).toArray()
+      const campaigns = await collectionCampaigns.find().toArray()
       return campaigns
     } catch (error) {
       console.error('Error en getCampaigns:', error.message)

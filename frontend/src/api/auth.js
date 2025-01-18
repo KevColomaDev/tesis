@@ -1,14 +1,14 @@
 import axios from "axios"
 
-const administratorAPI = 'https://tesis-yw0r.onrender.com/administrators'
-const socialWorkersAPI = 'https://tesis-yw0r.onrender.com/social-workers'
-const suppliesAPI = 'https://tesis-yw0r.onrender.com/supplies'
-const donationsAPI = 'https://tesis-yw0r.onrender.com/donations'
+// const administratorAPI = 'https://tesis-yw0r.onrender.com/administrators'
+// const socialWorkersAPI = 'https://tesis-yw0r.onrender.com/social-workers'
+// const suppliesAPI = 'https://tesis-yw0r.onrender.com/supplies'
+// const donationsAPI = 'https://tesis-yw0r.onrender.com/donations'
 
-// const administratorAPI = 'http://localhost:4321/administrators'
-// const socialWorkersAPI = 'http://localhost:4321/social-workers'
-// const suppliesAPI = 'http://localhost:4321/supplies'
-// const donationsAPI = 'http://localhost:4321/donations'
+const administratorAPI = 'http://localhost:4321/administrators'
+const socialWorkersAPI = 'http://localhost:4321/social-workers'
+const suppliesAPI = 'http://localhost:4321/supplies'
+const donationsAPI = 'http://localhost:4321/donations'
 
 export const loginRequest = async (user) => {
   const response = await axios.post(`${administratorAPI}/login`, user, { withCredentials: true })
@@ -214,12 +214,9 @@ export const createCampaignRequest = async (data) => {
 }
 
 // MOSTRAR CAMPANAS
-export const getCampaignsByDateRequest = async (date) => {
+export const getCampaignsByDateRequest = async () => {
   try {
-    const [year, month, day] = date.split('-'); // Divide la fecha en partes
-    const formattedDate = `${month}/${day}/${year}`
-
-    const response = await axios.get(`${donationsAPI}/campaigns-by-date?date=${formattedDate}`, { withCredentials: true });
+    const response = await axios.get(`${donationsAPI}/campaigns-by-date`, { withCredentials: true });
     return response.data;
   } catch (error) {
     console.error('Error fetching campaigns:', error);

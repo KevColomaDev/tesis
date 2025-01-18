@@ -1,37 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getCampaignsByDateRequest } from "../api/auth";
 
 const ShowCampaigns = ({ onClose }) => {
-  const [date, setDate] = useState("");
-  const [campaigns, setCampaigns] = useState([]);
-  const [noRecords, setNoRecords] = useState(false);
+  const [allCampaigns, setAllCampaigns] = useState([]);
 
-  const handleDateChange = (event) => {
-    const selectedDate = event.target.value;
-
-    // Convierte la fecha al formato UTC
-    const utcDate = new Date(selectedDate).toISOString().split("T")[0]; // Solo la parte de la fecha en formato YYYY-MM-DD
-
-    setDate(utcDate);
-
-    if (utcDate) {
-      fetchCampaignsByDate(utcDate);
-    } else {
-      setCampaigns([]);
-      setNoRecords(false);
+  useEffect(() => {
+    const getAllCampaigns = async () => {
+      const campaignsData = await getCampaignsByDateRequest();
+      console.log(campaignsData);
+      if (campaignsData) {
+        setAllCampaigns(campaignsData);
+      }
     }
-  };
-
-  const fetchCampaignsByDate = async (selectedDate) => {
-    const campaignsData = await getCampaignsByDateRequest(selectedDate);
-    if (campaignsData && campaignsData.length > 0) {
-      setCampaigns(campaignsData);
-      setNoRecords(false);
-    } else {
-      setCampaigns([]);
-      setNoRecords(true);
-    }
-  };
+    getAllCampaigns();
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
@@ -39,50 +21,18 @@ const ShowCampaigns = ({ onClose }) => {
         <h2 className="text-xl font-semibold mb-4 text-center">
           Campañas registradas
         </h2>
-
-        <label className="block mb-4">
-          <span className="text-gray-700">Fecha</span>
-          <input
-            type="date"
-            value={date}
-            onChange={handleDateChange}
-            className="mt-1 block w-full p-2 border rounded-md"
-          />
-        </label>
-
-        {date && (
-          <>
-            {campaigns.length > 0 ? (
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className="border px-4 py-2">Campaña</th>
-                    <th className="border px-4 py-2">Objetos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campaigns.map((campaign) => (
-                    <tr key={campaign._id}>
-                      <td className="border px-4 py-2">{campaign.name}</td>
-                      <td className="border px-4 py-2">
-                        {campaign.items.map((item, index) => (
-                          <div key={index}>
-                            {item.name} - {item.quantity}
-                          </div>
-                        ))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p className="text-center text-gray-500">
-                No hay registros en esta fecha
-              </p>
-            )}
-          </>
-        )}
-
+        <div className="flex w-full">
+          <p className="w-1/2 text-md font-semibold text-center">Nombre de la campaña</p>
+          <p className="w-1/2 text-md font-semibold text-center">Fecha de donación</p>
+        </div>
+        <div className="flex flex-col items-center">
+          {allCampaigns.map(campana => (
+            <div className="flex items-center w-full">
+              <p className="w-1/2 font-medium text-center" key={campana._id}>{campana.name}</p>
+              <p className="w-1/2 font-medium text-center" key={campana._id}>{campana.donationDate}</p>
+            </div>
+          ))}
+        </div>
         <div className="flex justify-center mt-4">
           <button
             onClick={onClose}
