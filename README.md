@@ -1,6 +1,6 @@
 # 🌐 Proyecto: Centro de Hospitalidad
-![image](https://github.com/user-attachments/assets/475cf76e-5bcc-4105-b76b-29633324ebfd)
 
+![image](https://github.com/user-attachments/assets/63711596-4756-4bca-9c42-e4c92c4a1a8c)
 
 ## 📄 Descripción
 
