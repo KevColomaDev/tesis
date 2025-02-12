@@ -220,6 +220,7 @@ export const setParamsinBlank = async (req, res) => {
     console.log(report)
 
     await managePatients.updatePatientState(roomData.ci, false)
+    console.log('Paciente actualizado', roomData.ci)
 
     // Limpiar los datos del paciente
     roomData.name = '---'
