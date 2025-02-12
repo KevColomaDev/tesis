@@ -152,6 +152,10 @@ export const registerInRoom = async (req, res) => {
     if (!patient.h_number || !patient.name) {
       return res.status(401).json({ msg: 'Neccesary name and room' })
     }
+    const patientExists = await administrators.getPatientByCi(patient.ci)
+    if (patientExists) {
+      return res.status(401).json({ msg: 'Patient already admitted' })
+    }
 
     const validAdmissionDate = validateDate(patient.admissionDate)
     if (!validAdmissionDate) {
@@ -195,7 +199,7 @@ export const setParamsinBlank = async (req, res) => {
     // Obtener la fecha y hora actuales
     const currentDate = new Date()
     const date = formatDate(currentDate)
-    const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone:'America/Guayaquil' })
+    const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guayaquil' })
 
     // Asignar la fecha y hora al objeto roomData
     roomData.departureDate = date
@@ -442,7 +446,7 @@ export const getReports = async (req, res) => {
     if (!startDate || !endDate) {
       return res.status(400).json({ msg: 'Start date and end date are required' })
     }
-    
+
     console.log(startDate, endDate) // Imprimir las fechas recibidas
 
     // Convertir las fechas a objetos Date
