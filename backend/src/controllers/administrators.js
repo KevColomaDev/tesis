@@ -152,10 +152,6 @@ export const registerInRoom = async (req, res) => {
     if (!patient.h_number || !patient.name) {
       return res.status(401).json({ msg: 'Neccesary name and room' })
     }
-    const patientExists = await administrators.getPatientByCi(patient.ci)
-    if (patientExists) {
-      return res.status(401).json({ msg: 'Patient already admitted' })
-    }
 
     const validAdmissionDate = validateDate(patient.admissionDate)
     if (!validAdmissionDate) {
