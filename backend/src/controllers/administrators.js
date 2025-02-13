@@ -158,9 +158,6 @@ export const registerInRoom = async (req, res) => {
       return res.status(401).json({ msg: 'Invalid admission date' })
     }
 
-    const patientExists = await administrators.getPatientByCi(patient.ci)
-    console.log('El paciente existe?', patientExists)
-
     const currentDate = new Date()
     const currentAdmissionDate = normalizeDate(currentDate.toLocaleDateString('es-ES'))
     const patientAdmissionDate = normalizeDate(patient.admissionDate)
