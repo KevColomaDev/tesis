@@ -37,9 +37,9 @@ const Formulario = ({ onClose, h_number, initialData, onComplete }) => {
         admissionTime: data.admissionTime ? transformTimetoString(data.admissionTime) : '',
       };
 
-      // console.log(initialData);
+      console.log(initialData);
       // const patient = await createPatientRequest(formData)
-      if (initialData.room === formData.h_number && flag) {
+      if ((initialData.room === formData.h_number) && flag) {
         console.log('son iguales');
         setFlag(false)
         if (initialData.name !== '---') {
